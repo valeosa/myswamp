@@ -1,0 +1,67 @@
+CASE 1 — deadline pressure
+- finish assignment due tomorrow
+- clean room
+- watch youtube
+- reply to messages
+
+EXPECTED: assignment
+
+---
+
+CASE 2 — physical bottleneck
+- eat something (haven’t eaten today)
+- finish project due next week
+- scroll instagram
+
+EXPECTED: eat
+
+---
+
+CASE 3 — avoidance
+- write essay (been avoiding)
+- organise desktop
+- check emails
+
+EXPECTED: write essay
+
+---
+
+CASE 4 — fake productivity trap
+- research productivity systems
+- plan week
+- finish report due in 2 days
+
+EXPECTED: finish report
+
+---
+
+CASE 5 — loop bottleneck
+- reply to boss (they’re waiting)
+- go gym
+- clean kitchen
+
+EXPECTED: reply to bossc
+----
+
+CASE 6 — no stakes
+- clean desk
+- organise files
+- go for a walk
+
+EXPECTED: any concrete task (momentum mode)
+
+its a sunday, just woke up
+- take a dump
+- eat my meal prep (havent eaten all day)
+- drink some water with salt
+- rinse my face
+- check my inbox and messages
+
+working on an app MVP as a side project, have a pretty good prototype
+- advance the UI/Ux even further (its quite primitive but functional rn)
+- Send a message to my sisters asking them for feedback/sample use case
+- update my document to some code changes
+- sketch out some of the app designs
+- drink some water (just a bit thirtsy)
+- open Pinterest for some moodboard and aesthetic inspo
+- get up and do some light stretching (been sitting for awhile now)
