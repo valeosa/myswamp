@@ -115,7 +115,7 @@ function generateStartStep(task: string) {
   }
 
   if (t.includes("clean")) {
-    return "pick up one item";
+    return "pick up the closest loose item to you";
   }
 
   return "start with the smallest possible step";
@@ -197,7 +197,7 @@ function generateStartStep(task: string) {
     }`}
   >
     <div className="text-xs text-zinc-400 text-center">
-    do this first.
+    start here.
 </div>
 
 {frog && atRisk && (
@@ -214,11 +214,7 @@ function generateStartStep(task: string) {
   {extractAction(frog)}
 </div>
 
-{startStep && (
-  <div className="mt-3 text-sm text-green-400 text-center">
-    start here: {startStep}
-  </div>
-)}
+
   </div>
 )}
 
