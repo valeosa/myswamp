@@ -196,18 +196,12 @@ function generateStartStep(task: string) {
       showFrog ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
     }`}
   >
-    <div className="text-xs text-zinc-400 text-center">
-    start here.
-</div>
+   
 
-{frog && atRisk && (
-  <div className="text-sm text-red-500 text-center">
-    your streak is at risk
-  </div>
-)}
+
 
 <div className="text-center text-lg mb-2">
-  🐸 do this now:
+  do this now:
 </div>
 
 <div className="p-5 bg-zinc-900 rounded-xl border border-green-500 text-lg font-mono">
