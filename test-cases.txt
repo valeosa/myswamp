@@ -5,7 +5,9 @@ CASE 1 — deadline pressure
 - reply to messages
 
 EXPECTED: assignment
-
+git add .
+git commit -m "update"
+git push
 ---
 
 CASE 2 — physical bottleneck

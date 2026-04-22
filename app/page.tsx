@@ -10,7 +10,12 @@ export default function Home() {
   const [showFrog, setShowFrog] = useState(false)
   const [frogStartedAt, setFrogStartedAt] = useState<number | null>(null)
   const [atRisk, setAtRisk] = useState(false)
+  const [startStep, setStartStep] = useState("");
   
+  function extractAction(frogText: string) {
+  const match = frogText.match(/🐸 moment’s frog:\n(.+)/);
+  return match ? match[1] : "";
+}
 
   useEffect(() => {
   const savedTasks = localStorage.getItem('tasks')
@@ -64,26 +69,56 @@ useEffect(() => {
     })
 
     const data = await res.json()
-    setTimeout(() => {
-  setFrog(data.frog)
-  setShowFrog(false)
+   const newFrog = data.frog;
 
-  setFrog(data.frog)
-setFrogStartedAt(Date.now())
-setAtRisk(false)
-
-  setTimeout(() => setShowFrog(true), 50)
-}, 300)
-setShowFrog(false)
+setShowFrog(false);
 
 setTimeout(() => {
-  setShowFrog(true)
-}, 50)
+  setFrog(newFrog);
+  setFrogStartedAt(Date.now());
+  setAtRisk(false);
+
+  // extract action from LLM output
+  const action = extractAction(newFrog);
+
+  // generate simple start step
+  const step = generateStartStep(action);
+  setStartStep(step);
+
+  setShowFrog(true);
+}, 300);
+
   } catch (err) {
     console.error(err)
   } finally {
     setLoading(false)
   }
+}
+
+function generateStartStep(task: string) {
+  const t = task.toLowerCase();
+
+  if (t.includes("write") || t.includes("edit")) {
+    return "open the document and write one sentence";
+  }
+
+  if (t.includes("study")) {
+    return "open your notes and read one page";
+  }
+
+  if (t.includes("code") || t.includes("build")) {
+    return "open your editor and change one line";
+  }
+
+  if (t.includes("email") || t.includes("reply")) {
+    return "open the message and type one sentence";
+  }
+
+  if (t.includes("clean")) {
+    return "pick up one item";
+  }
+
+  return "start with the smallest possible step";
 }
 
   return (
@@ -162,7 +197,7 @@ setTimeout(() => {
     }`}
   >
     <div className="text-xs text-zinc-400 text-center">
-    unfinished task active, you must complete this before continuinng 
+    do this first.
 </div>
 
 {frog && atRisk && (
@@ -171,16 +206,23 @@ setTimeout(() => {
   </div>
 )}
 
-<div className={`p-5 bg-zinc-900 rounded-xl whitespace-pre-wrap border border ${atRisk ? 'border-red-500' : 'border-gray-500'} text-base leading-relaxed font-mono transition-all duration-500 ${
-  showFrog ? 'scale-100 opacity-100' : 'scale-95 opacity-0' }`}>
-  {frog}
+<div className="text-center text-lg mb-2">
+  🐸 do this now:
 </div>
+
+<div className="p-5 bg-zinc-900 rounded-xl border border-green-500 text-lg font-mono">
+  {extractAction(frog)}
+</div>
+
+{startStep && (
+  <div className="mt-3 text-sm text-green-400 text-center">
+    start here: {startStep}
+  </div>
+)}
   </div>
 )}
 
-<button>
-  start here
-</button>
+
 
       </div>
 
