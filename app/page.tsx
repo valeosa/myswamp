@@ -129,28 +129,28 @@ function generateStartStep(task: string) {
         <h1 className="text-2xl font-semibold text-center">
            mySwamp
         </h1>
-
+        
         <textarea
           placeholder="dump your tasks..."
           value={tasks}
           onChange={(e) => {
-  setTasks(e.target.value)
-  localStorage.setItem('tasks', e.target.value)
-}}
+            setTasks(e.target.value)
+            localStorage.setItem('tasks', e.target.value)
+          }}
           disabled={!!frog}
-          className="w-full h-40 p-4 bg-zinc-900 rounded-xl outline-none resize-none"
+          className="relative z-10 w-full h-full p-4 bg-transparent rounded-xl outline-none resize-none placeholder:text-zinc-600"
         />
 
 {!frog && (
   <div className="text-sm text-zinc-500 text-center">
-    no active frog
+    the swamp is still
   </div>
 )}
 
-        <button
+       <button
   onClick={pickFrog}
   disabled={!!frog || loading}
-  className="w-full py-3 bg-white text-black rounded-xl font-medium hover:opacity-90 transition disabled:opacity-40"
+  className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
 >
   {loading ? '🐸 choosing your frog...' : 'pick my frog'}
 </button>
