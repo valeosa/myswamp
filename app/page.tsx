@@ -127,7 +127,7 @@ function generateStartStep(task: string) {
     <div className="w-full max-w-xl space-y-6">
 
       <div className="fixed bottom-6 right-6 text-[#8fa66c] text-sm font-mono opacity-70">
-        my swamp
+        mySwamp
        </div>
 
       {/* SWAMP PANEL */}
@@ -160,7 +160,7 @@ function generateStartStep(task: string) {
         disabled={!!frog || loading}
         className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
       >
-        {loading ? '🐸 choosing your frog...' : 'pick my frog'}
+        {loading ? 'choosing your frog...' : 'pick my frog'}
       </button>
 
       {frog && (
@@ -206,9 +206,7 @@ function generateStartStep(task: string) {
               : 'opacity-0 translate-y-3'
           }`}
         >
-          <div className="text-center text-[#c6d3b2]">
-            your frog surfaced:
-          </div>
+         
 
           <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50 text-[#e6eadf] text-lg font-mono">
             {extractAction(frog)}
