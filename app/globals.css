@@ -88,7 +88,8 @@ body {
   height: 9px;
   border-radius: 999px;
   background: #b6ff8a;
-  box-shadow: 0 0 10px #8bff5d;
+  box-shadow: 0 0 6px #8bff5d;
+  opacity: 0.85;
   animation: blink 5s infinite;
 }
 

@@ -122,21 +122,19 @@ function generateStartStep(task: string) {
 }
 
   return (
-  <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
+  <main className="min-h-screen bg-[#020805] text-white flex flex-col items-center justify-center p-6 relative">
+  
     <div className="w-full max-w-xl space-y-6">
 
-      <h1 className="text-2xl font-semibold text-center">
-        mySwamp
-      </h1>
+      <div className="fixed bottom-6 right-6 text-[#8fa66c] text-sm font-mono opacity-70">
+        my swamp
+       </div>
 
       {/* SWAMP PANEL */}
       <div className="swamp-panel relative w-full h-32 rounded-xl overflow-hidden">
         {!frog && (
           <>
-            <div className="frog-eyes">
-              <span />
-              <span />
-            </div>
+            
 
             <div className="reeds">╱╲╱╲╱</div>
             <div className="lily" />
