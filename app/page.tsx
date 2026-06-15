@@ -122,7 +122,7 @@ function generateStartStep(task: string) {
 }
 
   return (
- <main className="min-h-screen bg-[#06110b] text-white flex flex-col items-center justify-center p-6 relative">
+ <main className="min-h-screen bg-[#0a1710] text-white flex flex-col items-center justify-center p-6 relative">
   
     <div className="w-full max-w-xl space-y-6">
 
