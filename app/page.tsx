@@ -124,22 +124,25 @@ function generateStartStep(task: string) {
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
       
-      <div className="w-full max-w-xl space-y-6">
-        
-        <h1 className="text-2xl font-semibold text-center">
-           mySwamp
-        </h1>
-        
-        <textarea
-          placeholder="dump your tasks..."
-          value={tasks}
-          onChange={(e) => {
-            setTasks(e.target.value)
-            localStorage.setItem('tasks', e.target.value)
-          }}
-          disabled={!!frog}
-          className="relative z-10 w-full h-full p-4 bg-transparent rounded-xl outline-none resize-none placeholder:text-zinc-600"
-        />
+     <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
+  {!frog && (
+    <>
+      <div className="frog-eyes">
+        <span />
+        <span />
+      </div>
+      <div className="reeds">╱╲╱╲╱</div>
+      <div className="lily" />
+    </>
+  )}
+
+  <textarea
+    placeholder="dump your tasks..."
+    value={tasks}
+    onChange={(e) => setTasks(e.target.value)}
+    disabled={!!frog}
+    className="relative z-20 block w-full h-full p-4 bg-transparent text-white rounded-xl outline-none resize-none placeholder:text-zinc-600"
+  />
 
 {!frog && (
   <div className="text-sm text-zinc-500 text-center">
@@ -174,10 +177,11 @@ function generateStartStep(task: string) {
 
 
   
-  className="w-full py-4 rounded-xl border border-green-500 text-green-400 font-semibold text-lg
-           transition-all duration-200
-           hover:bg-green-500 hover:text-black
-           active:scale-95 active:bg-green-400"
+  className="w-full py-4 rounded-2xl border border-lime-900/40 
+bg-[#07100b] text-[#b7c89b] font-semibold text-lg
+transition-all duration-200
+hover:bg-[#9fb77b] hover:text-[#10140c]
+active:scale-95"
           
 >
   i did it 
@@ -185,30 +189,24 @@ function generateStartStep(task: string) {
         )}
 
 {frog && (
-  <div className="text-sm text-zinc-400 text-center">
-  🐸: {streak}
-  </div>
+  <div className="text-sm text-[#7f8f73] text-center">
+  frogs cleared: {streak}
+</div>
 )}
 
         {frog && (
   <div
-    className={`space-y-2 transition-all duration-500 ${
+    className={`space-y-3 transition-all duration-500 ${
       showFrog ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
     }`}
   >
-   
+    <div className="text-center text-[#c6d3b2]">
+      your frog surfaced:
+    </div>
 
-
-
-<div className="text-center text-lg mb-2">
-  do this now:
-</div>
-
-<div className="p-5 bg-zinc-900 rounded-xl border border-green-500 text-lg font-mono">
-  {extractAction(frog)}
-</div>
-
-
+    <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50 text-[#e6eadf] text-lg font-mono">
+      {extractAction(frog)}
+    </div>
   </div>
 )}
 

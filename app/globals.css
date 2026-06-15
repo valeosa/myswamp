@@ -140,3 +140,9 @@ body {
 .swamp-button:hover {
   filter: brightness(1.06);
 }
+
+.swamp-panel {
+  min-height: 160px;
+  background: linear-gradient(180deg, #14221a, #06100b);
+  border: 1px solid rgba(151, 185, 117, 0.25);
+}
