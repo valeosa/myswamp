@@ -122,7 +122,7 @@ function generateStartStep(task: string) {
 }
 
   return (
-  <main className="min-h-screen bg-[#020805] text-white flex flex-col items-center justify-center p-6 relative">
+ <main className="min-h-screen bg-[#06110b] text-white flex flex-col items-center justify-center p-6 relative">
   
     <div className="w-full max-w-xl space-y-6">
 
@@ -155,7 +155,7 @@ function generateStartStep(task: string) {
 
       {!frog && (
         <div className="text-sm text-zinc-500 text-center">
-          the swamp is still
+          the swamp is empty
         </div>
       )}
 
