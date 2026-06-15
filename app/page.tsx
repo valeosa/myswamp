@@ -153,11 +153,7 @@ function generateStartStep(task: string) {
         />
       </div>
 
-      {!frog && (
-        <div className="text-sm text-zinc-500 text-center">
-          the swamp is empty
-        </div>
-      )}
+      
 
       <button
         onClick={pickFrog}
