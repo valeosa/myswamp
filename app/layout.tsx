@@ -17,8 +17,12 @@ const mono = JetBrains_Mono({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "mySwamp",
-  description: "dump your tasks. get your frog",
+  description: "dump your tasks. get your frog.",
+  openGraph: {
+    images: ["/og-image.png"],
+  },
 };
+
 
 export default function RootLayout({
   children,
