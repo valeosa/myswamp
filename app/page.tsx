@@ -225,3 +225,4 @@ function generateStartStep(task: string) {
     </div>
   </main>
 )
+}
