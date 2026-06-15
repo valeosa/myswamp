@@ -135,8 +135,6 @@ function generateStartStep(task: string) {
         {!frog && (
           <>
             
-
-            <div className="reeds">╱╲╱╲╱</div>
             <div className="lily" />
           </>
         )}
@@ -188,7 +186,7 @@ function generateStartStep(task: string) {
             active:scale-95
           "
         >
-          i did it
+          done
         </button>
       )}
 
