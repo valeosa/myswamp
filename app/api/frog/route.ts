@@ -138,6 +138,20 @@ OUTPUT RULES (STRICT):
 HARD RULE: The frog MUST NOT contain the words "choose", "pick", 
 "decide", or "one specific". 
 
+OUTPUT FORMAT:
+Return ONLY valid JSON.
+
+{
+  "chosen_task": "exact task from the user's dump",
+  "first_step": "one tiny physical action under 2 minutes"
+}
+
+Rules:
+- chosen_task must be copied from the user's list, not invented.
+- first_step must be smaller than the task.
+- first_step must not contain "and".
+- first_step must not contain "prepare", "start", "work on", "organize", "handle", or "finish".
+
 For vague lists with no concrete tasks, the frog defaults to:
 "open your notes app and type whatever is sitting heaviest right now"
 
@@ -188,7 +202,21 @@ ${tasks}
     ],
   });
 
-  const output = completion.choices[0].message.content?.trim() || "touch the first object involved";
+  const output = completion.choices[0].message.content?.trim();
 
-  return Response.json({ frog: output });
+let parsed;
+
+try {
+  parsed = JSON.parse(output || "");
+} catch {
+  parsed = {
+    chosen_task: tasks.split("\n").find((t: string) => t.trim()) || "your task",
+    first_step: output || "touch the first object involved",
+  };
 }
+
+return Response.json({
+  chosen_task: parsed.chosen_task,
+  first_step: parsed.first_step,
+  frog: parsed.first_step,
+}); }

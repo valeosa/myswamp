@@ -11,6 +11,7 @@ export default function Home() {
   const [showFrog, setShowFrog] = useState(false)
   const [frogStartedAt, setFrogStartedAt] = useState<number | null>(null)
   const [atRisk, setAtRisk] = useState(false)
+  const [chosenTask, setChosenTask] = useState("")
   const [startStep, setStartStep] = useState("");
   
   function extractAction(frogText: string) {
@@ -70,6 +71,7 @@ useEffect(() => {
     })
 
     const data = await res.json()
+    setChosenTask(data.chosen_task || "")
    const newFrog = data.frog;
 
 setShowFrog(false);
@@ -126,6 +128,11 @@ function generateStartStep(task: string) {
 
   return "start with the smallest possible step";
 }
+
+const taskCount = tasks
+  .split("\n")
+  .filter(t => t.trim() !== "")
+  .length
 
   return (
  <main className="min-h-screen bg-[#0a1710] text-white flex flex-col items-center justify-center p-6 relative">
@@ -211,12 +218,31 @@ function generateStartStep(task: string) {
           }`}
         >
          
-
-          <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50 text-[#e6eadf] text-lg font-mono">
-            {extractAction(frog)}
-          </div>
+         {taskCount > 1 && (
+      <div className="p-4 rounded-2xl bg-[#0b120e] border border-[#33452d]/50">
+        <div className="text-[#7f8f73] text-xs mb-2">
+          frog
         </div>
-      )}
+
+        <div className="text-[#e6eadf] font-mono">
+          {chosenTask}
+        </div>
+      </div>
+    )}
+
+    <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50">
+      <div className="text-[#7f8f73] text-xs mb-2">
+        first step
+      </div>
+
+      <div className="text-[#e6eadf] text-lg font-mono">
+        {frog}
+      </div>
+    </div>
+  </div>
+)}
+
+         
 
     </div>
   </main>
