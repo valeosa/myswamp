@@ -188,7 +188,7 @@ ${tasks}
     ],
   });
 
-  const output = completion.choices[0].message.content;
+  const output = completion.choices[0].message.content?.trim() || "touch the first object involved";
 
   return Response.json({ frog: output });
 }

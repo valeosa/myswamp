@@ -15,7 +15,7 @@ export default function Home() {
   
   function extractAction(frogText: string) {
   const match = frogText.match(/🐸 moment’s frog:\n(.+)/);
-  return match ? match[1] : "";
+  return match ? match[1] : frogText;
 }
 
   useEffect(() => {
