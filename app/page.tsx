@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
   const [tasks, setTasks] = useState('')
@@ -73,20 +74,25 @@ useEffect(() => {
 
 setShowFrog(false);
 
-setTimeout(() => {
-  setFrog(newFrog);
-  setFrogStartedAt(Date.now());
-  setAtRisk(false);
+setTimeout(async () => {
+  setFrog(newFrog)
+  setFrogStartedAt(Date.now())
+  setAtRisk(false)
 
-  // extract action from LLM output
-  const action = extractAction(newFrog);
+  const action = extractAction(newFrog)
 
-  // generate simple start step
-  const step = generateStartStep(action);
-  setStartStep(step);
+  await supabase.from('frog_events').insert({
+    event_type: 'frog_picked',
+    raw_tasks: tasks,
+    frog_text: newFrog,
+    action_text: action,
+  })
 
-  setShowFrog(true);
-}, 300);
+  const step = generateStartStep(action)
+  setStartStep(step)
+
+  setShowFrog(true)
+}, 300)
 
   } catch (err) {
     console.error(err)

@@ -1,10 +1,12 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: Request) {
+  console.log("has key:", !!process.env.OPENAI_API_KEY);
+
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
   const { tasks } = await req.json();
 
   if (!tasks || tasks.trim() === "") {

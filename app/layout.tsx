@@ -3,6 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { JetBrains_Mono } from 'next/font/google'
 
+import { Analytics } from '@vercel/analytics/react'
+
+// inside your return:
+<Analytics />
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
