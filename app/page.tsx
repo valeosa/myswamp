@@ -159,25 +159,34 @@ const taskCount = tasks
           </>
         )}
 
-        <textarea
-          placeholder={`reply to mum
-                        finish the slide
-                        take out the bins...`}
-          value={tasks}
-          onChange={(e) => {
-            setTasks(e.target.value)
-            localStorage.setItem('tasks', e.target.value)
-          }}
-          disabled={!!frog}
-className="
-  relative z-20 block w-full h-full p-4
-  bg-transparent text-white rounded-xl
-  outline-none resize-none
-  placeholder:text-zinc-600
-  whitespace-pre-wrap
-"
-           />
-      </div>
+
+
+     <div className="swamp-panel relative w-full h-32 rounded-xl overflow-hidden">
+
+  {!frog && (
+    <>
+      <div className="lily" />
+    </>
+  )}
+
+  {!tasks && (
+    <div className="absolute top-4 left-4 z-10 pointer-events-none text-zinc-600 font-mono">
+      <div>reply to mum</div>
+      <div>finish the slide</div>
+      <div>take out the bins...</div>
+    </div>
+  )}
+
+  <textarea
+    value={tasks}
+    onChange={(e) => {
+      setTasks(e.target.value)
+      localStorage.setItem('tasks', e.target.value)
+    }}
+    disabled={!!frog}
+    className="relative z-20 block w-full h-full p-4 bg-transparent text-white rounded-xl outline-none resize-none"
+  />
+</div>
 
       
 
