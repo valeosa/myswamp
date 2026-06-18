@@ -162,10 +162,10 @@ const taskCount = tasks
   )}
 
   {!tasks && (
-    <div className="absolute top-4 left-4 z-10 pointer-events-none text-zinc-600 font-mono">
-      <div>reply to mum</div>
-      <div>finish the slide</div>
-      <div>take out the bins...</div>
+    <div className="absolute top-4 left-4 z-10 pointer-events-none text-zinc-700 font-mono">
+      <div>follow up on my cold email</div>
+      <div>return my amazon package</div>
+      <div>ask for the week 4 notes...</div>
     </div>
   )}
 
