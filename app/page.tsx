@@ -152,7 +152,7 @@ const taskCount = tasks
 
       {/* SWAMP PANEL */}
      
-     <div className="swamp-panel relative w-full h-35 rounded-xl overflow-hidden">
+     <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
 
   {!frog && (
     <>
