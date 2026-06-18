@@ -153,7 +153,9 @@ const taskCount = tasks
         )}
 
         <textarea
-          placeholder="dump your tasks..."
+          placeholder="reply to mum
+                       finish the slide
+                       take out the bins..."
           value={tasks}
           onChange={(e) => {
             setTasks(e.target.value)
