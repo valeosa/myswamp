@@ -153,14 +153,7 @@ const taskCount = tasks
     {/* SWAMP PANEL */}
 <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
 
-  {/* radial rings */}
-  <div
-    className="absolute inset-0 z-0 pointer-events-none opacity-70"
-    style={{
-      background:
-        "repeating-radial-gradient(circle at 50% 52%, transparent 0px, transparent 28px, rgba(143,166,108,0.32) 30px, transparent 34px)",
-    }}
-  />
+  
 
   {!frog && (
     <>
