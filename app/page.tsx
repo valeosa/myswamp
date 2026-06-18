@@ -147,6 +147,7 @@ const taskCount = tasks
   <div className="text-[#dfe8d8] text-3xl font-semibold tracking-tight">
     dump your tasks
   </div>
+</div>
 
 
       {/* SWAMP PANEL */}
