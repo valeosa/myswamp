@@ -144,7 +144,7 @@ const taskCount = tasks
        </div>
 
 <div className="space-y-2">
- <div className="text-[#dfe8d8] text-2xl font-semibold tracking-tight text-center">
+ <div className="text-[#dfe8d8] text-xl font-semibold tracking-tight text-center">
   dump your tasks
 </div>
 </div>
@@ -152,7 +152,7 @@ const taskCount = tasks
 
       {/* SWAMP PANEL */}
      
-     <div className="swamp-panel relative w-full h-32 rounded-xl overflow-hidden">
+     <div className="swamp-panel relative w-full h-35 rounded-xl overflow-hidden">
 
   {!frog && (
     <>
