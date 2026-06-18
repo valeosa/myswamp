@@ -143,6 +143,12 @@ const taskCount = tasks
         mySwamp
        </div>
 
+<div className="space-y-2">
+  <div className="text-[#dfe8d8] text-3xl font-semibold tracking-tight">
+    dump your tasks
+  </div>
+
+
       {/* SWAMP PANEL */}
       <div className="swamp-panel relative w-full h-32 rounded-xl overflow-hidden">
         {!frog && (
