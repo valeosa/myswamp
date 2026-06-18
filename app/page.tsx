@@ -159,17 +159,23 @@ const taskCount = tasks
         )}
 
         <textarea
-          placeholder="reply to mum
-                       finish the slide
-                       take out the bins..."
+          placeholder={`reply to mum
+                        finish the slide
+                        take out the bins...`}
           value={tasks}
           onChange={(e) => {
             setTasks(e.target.value)
             localStorage.setItem('tasks', e.target.value)
           }}
           disabled={!!frog}
-          className="relative z-20 block w-full h-full p-4 bg-transparent text-white rounded-xl outline-none resize-none placeholder:text-zinc-600"
-        />
+className="
+  relative z-20 block w-full h-full p-4
+  bg-transparent text-white rounded-xl
+  outline-none resize-none
+  placeholder:text-zinc-600
+  whitespace-pre-wrap
+"
+           />
       </div>
 
       
