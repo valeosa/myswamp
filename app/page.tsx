@@ -171,7 +171,7 @@ const taskCount = tasks
         disabled={!!frog || loading}
         className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
       >
-        {loading ? 'choosing your frog...' : 'pick my frog'}
+        {loading ? 'choosing your frog...' : 'into the swamp'}
       </button>
 
       {frog && (
