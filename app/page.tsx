@@ -109,7 +109,7 @@ export default function Home() {
       if (eventType === 'frog_completed') {
         setTasks('')
         setReliefMessage(true)
-        window.setTimeout(() => setReliefMessage(false), 1800)
+        window.setTimeout(() => setReliefMessage(false), 2400)
       }
       setFrog('')
       setFrogId('')
@@ -137,7 +137,7 @@ export default function Home() {
       if (eventType === 'frog_completed') {
         setTasks('')
         setReliefMessage(true)
-        window.setTimeout(() => setReliefMessage(false), 1800)
+        window.setTimeout(() => setReliefMessage(false), 2400)
       } else {
         setPendingCount((current) => current + 1)
       }
@@ -200,13 +200,13 @@ export default function Home() {
         )}
 
         {dumpIsTooLarge && (
-          <p role="alert" className="swamp-message text-center text-sm text-[#d0ae82]">
+          <p role="alert" className="text-center text-sm text-[#d0ae82]">
             This swamp is a little crowded. Keep it to {MAX_TASKS} tasks and {MAX_DUMP_LENGTH.toLocaleString()} characters.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="swamp-message rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">
+          <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">
             {error}
           </p>
         )}
@@ -277,8 +277,8 @@ export default function Home() {
         )}
 
         {reliefMessage && (
-          <div role="status" className="mist-toast fixed left-1/2 top-1/2 z-50 w-fit rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
-            it’s lighter now.
+          <div role="status" className="lighter-veil fixed inset-0 z-50 flex items-center justify-center">
+            <p className="simmer-text text-lg text-[#c8d8b8]">it’s lighter now.</p>
           </div>
         )}
       </div>

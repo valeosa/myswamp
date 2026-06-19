@@ -71,25 +71,28 @@ export default function HistoryPage() {
   async function hideFrog() {
     if (!frogToHide) return
 
+    const frog = frogToHide
     setDeleting(true)
     setError('')
+
+    // Let the interface respond immediately. The server update follows, while
+    // local memory keeps the frog hidden if the live schema is still catching up.
+    const hidden = locallyHiddenFrogs()
+    hidden.add(frog.id)
+    localStorage.setItem(HIDDEN_FROGS_KEY, JSON.stringify([...hidden]))
+    setFrogs((current) => current.filter((item) => item.id !== frog.id))
+    setFrogToHide(null)
 
     try {
       const response = await fetch('/api/history', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: frogToHide.id }),
+        body: JSON.stringify({ id: frog.id }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'This frog would not sink just yet.')
-
-      const hidden = locallyHiddenFrogs()
-      hidden.add(frogToHide.id)
-      localStorage.setItem(HIDDEN_FROGS_KEY, JSON.stringify([...hidden]))
-      setFrogs((current) => current.filter((frog) => frog.id !== frogToHide.id))
-      setFrogToHide(null)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'This frog would not sink just yet.')
+      console.error('server-side frog concealment failed', reason)
     } finally {
       setDeleting(false)
     }
@@ -109,7 +112,7 @@ export default function HistoryPage() {
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
         {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
-        {error && <p role="alert" className="swamp-message rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
+        {error && <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
         {!loading && isSignedIn && !error && frogs.length === 0 && (
           <div className="flex min-h-[28rem] flex-col items-center justify-center pb-12 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#294532] text-[#78957c]">
@@ -177,8 +180,8 @@ export default function HistoryPage() {
       </div>
 
       {frogToHide && (
-        <div className="swamp-veil fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="swamp-dialog w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6" role="presentation">
+          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6">
             <h2 id="hide-frog-title" className="text-lg text-[#c8d8b8]">let this frog sink?</h2>
             <p className="mt-3 text-sm leading-6 text-[#8fa087]">the swamp still remembers, but it won’t be displayed here.</p>
             <div className="mt-6 grid grid-cols-2 gap-3">

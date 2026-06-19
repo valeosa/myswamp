@@ -62,15 +62,16 @@ summary {
   100% { opacity: 1; transform: translateY(0); letter-spacing: normal; }
 }
 
-@keyframes ripple-bloom {
-  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.82); border-radius: 46% 54% 48% 52%; }
-  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.035); border-radius: 53% 47% 55% 45%; }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); border-radius: 999px; }
+@keyframes simmer {
+  0% { opacity: 0; transform: translateY(5px); letter-spacing: 0.06em; }
+  35% { opacity: 0.72; }
+  70% { opacity: 1; transform: translateY(0); letter-spacing: 0.015em; }
+  100% { opacity: 0.88; transform: translateY(-1px); letter-spacing: normal; }
 }
 
-@keyframes veil-settle {
+@keyframes lighter-veil {
   from { background-color: rgba(1, 7, 3, 0); }
-  to { background-color: rgba(1, 7, 3, 0.78); }
+  to { background-color: rgba(1, 7, 3, 0.72); }
 }
 
 .page-surface {
@@ -82,33 +83,24 @@ summary {
   animation: rise-from-water 720ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
 }
 
-.mist-toast {
-  left: 50%;
-  right: auto;
-  animation: ripple-bloom 520ms cubic-bezier(0.18, 0.8, 0.25, 1) both;
-}
-
 .water-whisper {
   animation: water-whisper 650ms ease-out both;
 }
 
-.swamp-message,
-.swamp-dialog {
-  animation: rise-from-water 560ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+.lighter-veil {
+  animation: lighter-veil 700ms ease-out both;
 }
 
-.swamp-veil {
-  animation: veil-settle 420ms ease-out both;
+.simmer-text {
+  animation: simmer 1.8s ease-in-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page-surface,
   .mist-reveal,
-  .mist-toast,
   .water-whisper,
-  .swamp-message,
-  .swamp-dialog,
-  .swamp-veil {
+  .lighter-veil,
+  .simmer-text {
     animation: none;
   }
 }

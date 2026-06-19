@@ -109,7 +109,7 @@ export default function PreferencesPage() {
               description="report how the swamp is feeling"
             />
 
-            {error && <p role="alert" className="swamp-message text-sm text-[#e2c2a8]">{error}</p>}
+            {error && <p role="alert" className="text-sm text-[#e2c2a8]">{error}</p>}
             {message && <p role="status" className="water-whisper text-sm text-[#9fb77b]">{message}</p>}
 
             <button
