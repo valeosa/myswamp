@@ -1,41 +1,63 @@
 
 import { auth } from "@clerk/nextjs/server";
 import OpenAI from "openai";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 
+const MAX_DUMP_LENGTH = 4_000;
+const MAX_TASKS = 50;
 
-export async function POST(req: Request) {
-  console.log("has key:", !!process.env.OPENAI_API_KEY);
-
+async function chooseFrog(req: Request) {
   const { userId } = await auth();
 
     if (!userId) {
       return Response.json({ error: "Not signed in" }, { status: 401 });
 }
 
-  const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  const rateLimit = checkRateLimit(`frog:${userId}`, 10, 10 * 60 * 1000);
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: "The swamp needs a moment. Try again soon." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfter) } },
+    );
+  }
 
   const { tasks } = await req.json();
 
-  if (!tasks || tasks.trim() === "") {
-    return Response.json({
-      frog: "No tasks received. Check frontend binding.",
-    });
+  if (typeof tasks !== "string" || tasks.trim() === "") {
+    return Response.json({ error: "Add at least one task first." }, { status: 400 });
+  }
+
+  if (tasks.length > MAX_DUMP_LENGTH) {
+    return Response.json(
+      { error: `Keep your task dump under ${MAX_DUMP_LENGTH.toLocaleString()} characters.` },
+      { status: 400 },
+    );
   }
 
   const taskLines = tasks.split('\n').filter((t: string) => t.trim() !== '');
+
+  if (taskLines.length > MAX_TASKS) {
+    return Response.json(
+      { error: `Keep this swamp to ${MAX_TASKS} tasks or fewer.` },
+      { status: 400 },
+    );
+  }
+
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const vaguePattern = /^(get my life|be more productive|sort myself|adult better|become happy|be better|be happier)/i;
 const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
   vaguePattern.test(t.trim())
 );
 
+let chosenTask = "";
+let firstStep = "";
+
 if (isVague) {
-  return Response.json({ 
-    frog: `pattern recognition:\nno concrete tasks detected\n\n🐸 moment's frog:\nopen your notes app and type whatever is sitting heaviest right now\n\nwhy:\nno actionable task → nothing can actually start` 
-  });
-}
+  chosenTask = taskLines[0]?.trim() || "your task";
+  firstStep = "open your notes app and type whatever is sitting heaviest right now";
+} else {
 
 const tasksToSend = tasks;
 
@@ -224,10 +246,60 @@ try {
   };
 }
 
+chosenTask = parsed.chosen_task;
+firstStep = parsed.first_step;
+}
 
-return Response.json({
-  chosen_task: parsed.chosen_task,
-  first_step: parsed.first_step,
-  frog: parsed.first_step,
-  
-}); }
+  const supabase = getSupabaseAdmin();
+  const { data: savedFrog, error: frogError } = await supabase
+    .from("frogs")
+    .insert({
+      user_id: userId,
+      task_dump: tasks.trim(),
+      frog: firstStep,
+      chosen_task: chosenTask,
+      status: "active",
+    })
+    .select("id")
+    .single();
+
+  if (frogError) throw frogError;
+
+  const { error: eventsError } = await supabase.from("frog_events").insert([
+    {
+      user_id: userId,
+      frog_id: savedFrog.id,
+      event_type: "swamp_dumped",
+      raw_tasks: tasks.trim(),
+    },
+    {
+      user_id: userId,
+      frog_id: savedFrog.id,
+      event_type: "frog_assigned",
+      raw_tasks: tasks.trim(),
+      frog_text: firstStep,
+      action_text: firstStep,
+    },
+  ]);
+
+  if (eventsError) throw eventsError;
+
+  return Response.json({
+    id: savedFrog.id,
+    chosen_task: chosenTask,
+    first_step: firstStep,
+    frog: firstStep,
+  });
+}
+
+export async function POST(req: Request) {
+  try {
+    return await chooseFrog(req);
+  } catch (error) {
+    console.error("frog route failed", error);
+    return Response.json(
+      { error: "The swamp is a little foggy right now. Your tasks are still safe—please try again." },
+      { status: 503 },
+    );
+  }
+}
