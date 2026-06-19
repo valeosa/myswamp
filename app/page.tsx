@@ -1,9 +1,11 @@
 'use client'
-
 import { useEffect, useState } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default function Home() {
+  const { userId, isLoaded, isSignedIn } = useAuth()
   const [tasks, setTasks] = useState('')
   const [frog, setFrog] = useState('')
   const [streak, setStreak] = useState(0)
@@ -58,6 +60,8 @@ useEffect(() => {
 
 
   const pickFrog = async () => {
+  if (!isLoaded) return
+  if (!isSignedIn || !userId) return
   if (!tasks.trim()) return
   if (frog) return
 
@@ -70,9 +74,17 @@ useEffect(() => {
       body: JSON.stringify({ tasks }),
     })
 
-    const data = await res.json()
+   const data = await res.json()
     setChosenTask(data.chosen_task || "")
    const newFrog = data.frog;
+   
+const { error: frogsError } = await supabase.from('frogs').insert({
+  user_id: userId,
+  task_dump: tasks,
+  frog: newFrog,
+})
+
+console.log("frogs insert error:", frogsError)
 
 setShowFrog(false);
 
@@ -82,13 +94,19 @@ setTimeout(async () => {
   setAtRisk(false)
 
   const action = extractAction(newFrog)
+console.log("clerk userId:", userId)
 
-  await supabase.from('frog_events').insert({
-    event_type: 'frog_picked',
-    raw_tasks: tasks,
-    frog_text: newFrog,
-    action_text: action,
-  })
+  const { error } = await supabase
+  .from('frog_events')
+  .insert({
+  user_id: userId,
+  event_type: 'frog_picked',
+  raw_tasks: tasks,
+  frog_text: newFrog,
+  action_text: action,
+})
+
+console.log('frog_events error:', error)
 
   const step = generateStartStep(action)
   setStartStep(step)
@@ -139,9 +157,12 @@ const taskCount = tasks
   
     <div className="w-full max-w-xl space-y-6">
 
-      <div className="fixed bottom-6 right-6 text-[#8fa66c] text-sm font-mono opacity-70">
-        mySwamp
-       </div>
+     <Link
+  href="/history"
+  className="fixed bottom-6 right-6 text-[#8fa66c] text-sm font-mono opacity-70 hover:opacity-100"
+>
+  history
+</Link>
 
 <div className="space-y-2">
  <div className="text-[#dfe8d8] text-xl font-semibold tracking-tight text-center">
@@ -190,17 +211,30 @@ const taskCount = tasks
 
       {frog && (
         <button
-          onClick={() => {
-            setStreak((s) => s + 1)
+          onClick={async () => {
+  setStreak((s) => s + 1)
 
-            setFrog('')
-            setFrogStartedAt(null)
-            setAtRisk(false)
+  const action = extractAction(frog)
 
-            setTimeout(() => {
-              pickFrog()
-            }, 300)
-          }}
+ await supabase
+  .from('frog_events')
+  .insert({
+    user_id: userId,
+    event_type: 'frog_completed',
+    frog_text: frog,
+    action_text: action,
+    completed: true,
+    completed_at: new Date().toISOString(),
+  })
+
+  setFrog('')
+  setFrogStartedAt(null)
+  setAtRisk(false)
+
+  setTimeout(() => {
+    pickFrog()
+  }, 300)
+}}
           className="
             w-full py-4 rounded-2xl
             border border-lime-900/40
