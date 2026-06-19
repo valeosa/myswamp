@@ -89,10 +89,10 @@ export default function HistoryPage() {
 
   return (
     <main className="min-h-screen bg-[#07100b] p-6 pt-24 font-sans text-white">
-      <div className="max-w-2xl mx-auto space-y-7">
+      <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight text-[#e4eddc] sm:text-5xl">the water’s memory</h1>
-          <p className="mt-3 text-xl italic text-[#718b75] sm:text-2xl">what surfaced, what was done</p>
+          <h1 className="text-2xl font-semibold text-[#e4eddc]">the water’s memory</h1>
+          <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
         </div>
 
         <Link href="/" className="inline-block text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
@@ -100,17 +100,17 @@ export default function HistoryPage() {
         </Link>
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
-        {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in to see what the swamp remembers.</p>}
+        {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
         {error && <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
         {!loading && isSignedIn && !error && frogs.length === 0 && (
           <div className="flex min-h-[28rem] flex-col items-center justify-center pb-12 text-center">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#294532] text-[#78957c]">
-              <svg aria-hidden="true" viewBox="0 0 32 40" className="h-10 w-10 fill-none stroke-current" strokeWidth="2.5">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#294532] text-[#78957c]">
+              <svg aria-hidden="true" viewBox="0 0 32 40" className="h-8 w-8 fill-none stroke-current" strokeWidth="2.5">
                 <path d="M16 2.5C12.6 7.6 5 14.5 5 23.1 5 30.8 9.9 36 16 36s11-5.2 11-12.9C27 14.5 19.4 7.6 16 2.5Z" />
               </svg>
             </div>
-            <p className="mt-8 text-3xl font-medium text-[#78957c]">nothing yet.</p>
-            <p className="mt-8 text-xl italic leading-relaxed text-[#718b75] sm:text-2xl">
+            <p className="mt-6 text-xl font-medium text-[#78957c]">nothing yet.</p>
+            <p className="mt-5 text-base italic leading-relaxed text-[#718b75]">
               complete your first frog<br />
               and it will appear here.
             </p>
