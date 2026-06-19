@@ -4,8 +4,8 @@ import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const MAX_DUMP_LENGTH = 4_000;
-const MAX_TASKS = 50;
+const MAX_DUMP_LENGTH = 2_000;
+const MAX_TASKS = 25;
 
 async function chooseFrog(req: Request) {
   const { userId } = await auth();

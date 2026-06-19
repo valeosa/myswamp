@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 
-const MAX_DUMP_LENGTH = 4_000
-const MAX_TASKS = 50
+const MAX_DUMP_LENGTH = 2_000
+const MAX_TASKS = 25
 
 export default function Home() {
   const { isLoaded, isSignedIn } = useAuth()
