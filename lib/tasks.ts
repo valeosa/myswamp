@@ -11,14 +11,15 @@ function comparableTask(task: string) {
   return task.toLocaleLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
 }
 
-export function getTadpoles(taskDump: string, chosenTask: string | null) {
+export function getTadpoles(taskDump: string, chosenTask: string | null, frogText?: string) {
   const tasks = parseTasks(taskDump)
-  if (!chosenTask) return tasks
+  const selectedTask = chosenTask || frogText
+  if (!selectedTask) return []
 
-  const chosen = comparableTask(chosenTask)
+  const chosen = comparableTask(selectedTask)
   let removedFrog = false
 
-  return tasks.filter((task) => {
+  const tadpoles = tasks.filter((task) => {
     if (removedFrog) return true
 
     const candidate = comparableTask(task)
@@ -26,4 +27,9 @@ export function getTadpoles(taskDump: string, chosenTask: string | null) {
     if (isFrog) removedFrog = true
     return !isFrog
   })
+
+  // Old records sometimes stored only a generated first step, not the
+  // selected source task. Avoid calling the whole dump "tadpoles" when the
+  // frog cannot be identified with confidence.
+  return removedFrog ? tadpoles : []
 }

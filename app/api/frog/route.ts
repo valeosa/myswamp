@@ -16,17 +16,25 @@ export async function GET() {
 
     const account = await getOrCreateAccount(userId);
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
-      .from("frogs")
-      .select("id, task_dump, frog, chosen_task, created_at")
-      .eq("account_id", account.id)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [activeFrog, pendingFrogs] = await Promise.all([
+      supabase
+        .from("frogs")
+        .select("id, task_dump, frog, chosen_task, created_at")
+        .eq("account_id", account.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("frogs")
+        .select("id", { count: "exact", head: true })
+        .eq("account_id", account.id)
+        .eq("status", "not_completed"),
+    ]);
 
-    if (error) throw error;
-    return Response.json({ frog: data });
+    if (activeFrog.error) throw activeFrog.error;
+    if (pendingFrogs.error) throw pendingFrogs.error;
+    return Response.json({ frog: activeFrog.data, pending_count: pendingFrogs.count ?? 0 });
   } catch (error) {
     console.error("active frog lookup failed", error);
     return Response.json(

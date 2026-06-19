@@ -15,12 +15,6 @@ type Frog = {
   completed_at: string | null
 }
 
-const statusCopy: Record<Frog['status'], string> = {
-  active: 'resting on the lily pad',
-  completed: 'finished',
-  not_completed: 'not yet',
-}
-
 function readableDate(value: string) {
   const date = new Date(value)
   const day = date.toLocaleDateString('en-GB', {
@@ -118,12 +112,12 @@ export default function HistoryPage() {
         )}
 
         {frogs.map((item) => {
-          const tadpoles = getTadpoles(item.task_dump, item.chosen_task)
+          const tadpoles = getTadpoles(item.task_dump, item.chosen_task, item.frog)
 
           return (
             <article key={item.id} className="group relative rounded-2xl border border-lime-900/40 bg-[#0b1710] p-5 pb-12 space-y-3 transition-colors hover:border-[#38522e]">
               <div className="flex justify-end text-xs text-[#8fa66c]">
-                <span>{statusCopy[item.status]}</span>
+                <span>finished</span>
               </div>
 
               <div>
@@ -133,7 +127,7 @@ export default function HistoryPage() {
 
               {item.chosen_task && (
                 <details className="text-sm text-[#d7ddd2]">
-                  <summary className="cursor-pointer text-[#718067] transition-colors hover:text-[#a7b69a]">one small action</summary>
+                  <summary className="cursor-pointer text-[#718067] transition-colors hover:text-[#a7b69a]">your one small action</summary>
                   <p className="mt-2 pl-4">{item.frog}</p>
                 </details>
               )}

@@ -21,6 +21,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [hydrated, setHydrated] = useState(false)
   const [restoringFrog, setRestoringFrog] = useState(true)
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -50,7 +51,10 @@ export default function Home() {
         const response = await fetch('/api/frog')
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'The swamp could not find your resting frog.')
-        if (cancelled || !data.frog) return
+        if (cancelled) return
+
+        setPendingCount(data.pending_count ?? 0)
+        if (!data.frog) return
 
         setFrogId(data.frog.id)
         setTasks(data.frog.task_dump)
@@ -122,6 +126,8 @@ export default function Home() {
       if (eventType === 'frog_completed') {
         setStreak((current) => current + 1)
         setTasks('')
+      } else {
+        setPendingCount((current) => current + 1)
       }
 
       setFrog('')
@@ -138,12 +144,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a1710] text-white flex flex-col items-center justify-center p-6 relative">
       <div className="w-full max-w-xl space-y-6">
-        <Link
-          href="/history"
-          className="fixed bottom-6 right-6 text-[#8fa66c] text-sm opacity-70 hover:opacity-100"
-        >
-          the water’s memory
-        </Link>
+        <nav className="fixed bottom-6 right-6 flex gap-5 text-sm text-[#8fa66c]">
+          <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>
+          <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</Link>
+        </nav>
 
         <div className="space-y-1 text-center">
           <h1 className="text-[#dfe8d8] text-xl font-semibold tracking-tight">dump your tasks</h1>
@@ -212,13 +216,13 @@ export default function Home() {
             {taskCount > 1 && chosenTask && (
               <div className="p-4 rounded-2xl bg-[#0b120e] border border-[#33452d]/50">
                 <div className="text-[#7f8f73] text-xs mb-2">frog</div>
-                <div className="text-[#e6eadf] font-mono">{chosenTask}</div>
+                <div className="text-[#e6eadf]">{chosenTask}</div>
               </div>
             )}
 
             <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50">
-              <div className="text-[#7f8f73] text-xs mb-2">one small action</div>
-              <div className="text-[#e6eadf] text-lg font-mono">{frog}</div>
+              <div className="text-[#7f8f73] text-xs mb-2">start here</div>
+              <div className="text-[#e6eadf] text-lg">{frog}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -238,8 +242,14 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="text-sm text-[#7f8f73] text-center">frogs cleared here: {streak}</div>
+            <div className="text-sm text-[#7f8f73] text-center">frogs cleared: {streak}</div>
           </div>
+        )}
+
+        {pendingCount > 0 && (
+          <Link href="/current" className="block text-center text-sm text-[#8fa66c] opacity-80 transition-opacity hover:opacity-100">
+            {pendingCount === 1 ? 'one frog pending' : `${pendingCount} frogs pending`}
+          </Link>
         )}
       </div>
     </main>
@@ -259,9 +269,6 @@ function SwampScenery() {
           <stop offset="0" stopColor="#9bb995" stopOpacity="0.02" />
           <stop offset="1" stopColor="#78936f" stopOpacity="0.12" />
         </linearGradient>
-        <filter id="soft-fog">
-          <feGaussianBlur stdDeviation="8" />
-        </filter>
       </defs>
 
       <g fill="none" stroke="#829b78" strokeLinecap="round" opacity="0.2">
@@ -277,11 +284,6 @@ function SwampScenery() {
         <ellipse cx="54" cy="38" rx="4" ry="2" transform="rotate(-22 54 38)" />
         <ellipse cx="581" cy="34" rx="5" ry="2" transform="rotate(25 581 34)" />
         <ellipse cx="570" cy="58" rx="5" ry="2" transform="rotate(-30 570 58)" />
-      </g>
-
-      <g filter="url(#soft-fog)" fill="#c4d1bf" opacity="0.07">
-        <ellipse cx="180" cy="95" rx="125" ry="16" />
-        <ellipse cx="435" cy="76" rx="105" ry="13" />
       </g>
 
       <path d="M0 126 C110 117 180 139 290 128 C410 116 490 136 600 123 L600 160 L0 160 Z" fill="url(#water-haze)" />

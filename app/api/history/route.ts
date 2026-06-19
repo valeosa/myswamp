@@ -15,6 +15,7 @@ export async function GET() {
       .from('frogs')
       .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
       .eq('account_id', account.id)
+      .eq('status', 'completed')
       .is('hidden_at', null)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -26,6 +27,7 @@ export async function GET() {
         .from('frogs')
         .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
         .eq('account_id', account.id)
+        .eq('status', 'completed')
         .order('created_at', { ascending: false })
         .limit(100)
 
