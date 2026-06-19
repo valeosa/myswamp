@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getOrCreateAccount } from '@/lib/account'
 
 export async function GET() {
   try {
@@ -9,10 +10,11 @@ export async function GET() {
     }
 
     const supabase = getSupabaseAdmin()
+    const account = await getOrCreateAccount(userId)
     const visibleHistory = await supabase
       .from('frogs')
       .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
-      .eq('user_id', userId)
+      .eq('account_id', account.id)
       .is('hidden_at', null)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -23,7 +25,7 @@ export async function GET() {
       const fallbackHistory = await supabase
         .from('frogs')
         .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
-        .eq('user_id', userId)
+        .eq('account_id', account.id)
         .order('created_at', { ascending: false })
         .limit(100)
 
@@ -55,11 +57,12 @@ export async function DELETE(req: Request) {
     }
 
     const supabase = getSupabaseAdmin()
+    const account = await getOrCreateAccount(userId)
     const { data, error } = await supabase
       .from('frogs')
       .update({ hidden_at: new Date().toISOString() })
       .eq('id', id)
-      .eq('user_id', userId)
+      .eq('account_id', account.id)
       .select('id')
       .maybeSingle()
 

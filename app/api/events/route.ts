@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { isFrogEventType } from '@/lib/frog-events'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getOrCreateAccount } from '@/lib/account'
 
 export async function POST(req: Request) {
   try {
@@ -28,11 +29,12 @@ export async function POST(req: Request) {
     }
 
     const supabase = getSupabaseAdmin()
+    const account = await getOrCreateAccount(userId)
     const { data: frog, error: findError } = await supabase
       .from('frogs')
       .select('id, frog')
       .eq('id', frogId)
-      .eq('user_id', userId)
+      .eq('account_id', account.id)
       .single()
 
     if (findError || !frog) {
@@ -48,12 +50,13 @@ export async function POST(req: Request) {
         completed_at: completed ? occurredAt : null,
       })
       .eq('id', frogId)
-      .eq('user_id', userId)
+      .eq('account_id', account.id)
 
     if (updateError) throw updateError
 
     const { error: eventError } = await supabase.from('frog_events').insert({
       user_id: userId,
+      account_id: account.id,
       frog_id: frogId,
       event_type: eventType,
       frog_text: frog.frog,

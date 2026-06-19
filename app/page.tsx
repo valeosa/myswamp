@@ -9,7 +9,7 @@ const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
 
 export default function Home() {
-  const { isLoaded, isSignedIn } = useAuth()
+  const { userId, isLoaded, isSignedIn } = useAuth()
   const [tasks, setTasks] = useState('')
   const [frog, setFrog] = useState('')
   const [frogId, setFrogId] = useState('')
@@ -19,27 +19,55 @@ export default function Home() {
   const [showFrog, setShowFrog] = useState(false)
   const [error, setError] = useState('')
   const [hydrated, setHydrated] = useState(false)
+  const [restoringFrog, setRestoringFrog] = useState(true)
 
   useEffect(() => {
     queueMicrotask(() => {
-      const savedFrog = localStorage.getItem('frog') ?? ''
-      const savedFrogId = localStorage.getItem('frogId') ?? ''
-
       setTasks(localStorage.getItem('tasks') ?? '')
-      setFrog(savedFrogId ? savedFrog : '')
-      setFrogId(savedFrogId)
-      setChosenTask(savedFrogId ? (localStorage.getItem('chosenTask') ?? '') : '')
       setStreak(Number(localStorage.getItem('streak') ?? 0))
-      setShowFrog(Boolean(savedFrog && savedFrogId))
+      localStorage.removeItem('frog')
+      localStorage.removeItem('frogId')
+      localStorage.removeItem('chosenTask')
       setHydrated(true)
     })
   }, [])
 
   useEffect(() => { if (hydrated) localStorage.setItem('tasks', tasks) }, [hydrated, tasks])
-  useEffect(() => { if (hydrated) localStorage.setItem('frog', frog) }, [frog, hydrated])
-  useEffect(() => { if (hydrated) localStorage.setItem('frogId', frogId) }, [frogId, hydrated])
-  useEffect(() => { if (hydrated) localStorage.setItem('chosenTask', chosenTask) }, [chosenTask, hydrated])
   useEffect(() => { if (hydrated) localStorage.setItem('streak', String(streak)) }, [hydrated, streak])
+
+  useEffect(() => {
+    if (!isLoaded) return
+    if (!isSignedIn || !userId) {
+      queueMicrotask(() => setRestoringFrog(false))
+      return
+    }
+
+    let cancelled = false
+
+    async function restoreActiveFrog() {
+      try {
+        const response = await fetch('/api/frog')
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'The swamp could not find your resting frog.')
+        if (cancelled || !data.frog) return
+
+        setFrogId(data.frog.id)
+        setTasks(data.frog.task_dump)
+        setChosenTask(data.frog.chosen_task ?? '')
+        setFrog(data.frog.frog)
+        setShowFrog(true)
+      } catch (reason) {
+        if (!cancelled) {
+          setError(reason instanceof Error ? reason.message : 'The swamp could not find your resting frog.')
+        }
+      } finally {
+        if (!cancelled) setRestoringFrog(false)
+      }
+    }
+
+    restoreActiveFrog()
+    return () => { cancelled = true }
+  }, [isLoaded, isSignedIn, userId])
 
   const taskCount = parseTasks(tasks).length
   const dumpIsTooLarge = tasks.length > MAX_DUMP_LENGTH || taskCount > MAX_TASKS
@@ -135,7 +163,7 @@ export default function Home() {
             aria-label="Your task dump"
             value={tasks}
             onChange={(event) => setTasks(event.target.value)}
-            disabled={Boolean(frog) || loading}
+            disabled={Boolean(frog) || loading || restoringFrog}
             className="relative z-20 block w-full h-full p-4 bg-transparent text-white rounded-xl outline-none resize-none disabled:opacity-60"
           />
         </div>
@@ -160,7 +188,7 @@ export default function Home() {
         {!frog && (
           <button
             onClick={pickFrog}
-            disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading}
+            disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
             {loading ? 'choosing your frog...' : 'into the swamp'}

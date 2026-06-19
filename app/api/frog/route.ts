@@ -4,9 +4,37 @@ import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { parseTasks } from "@/lib/tasks";
+import { getOrCreateAccount } from "@/lib/account";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
+
+export async function GET() {
+  try {
+    const { userId } = await auth();
+    if (!userId) return Response.json({ error: "Not signed in" }, { status: 401 });
+
+    const account = await getOrCreateAccount(userId);
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("frogs")
+      .select("id, task_dump, frog, chosen_task, created_at")
+      .eq("account_id", account.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return Response.json({ frog: data });
+  } catch (error) {
+    console.error("active frog lookup failed", error);
+    return Response.json(
+      { error: "The swamp could not find your resting frog. Please try again." },
+      { status: 503 },
+    );
+  }
+}
 
 async function chooseFrog(req: Request) {
   const { userId } = await auth();
@@ -46,6 +74,7 @@ async function chooseFrog(req: Request) {
   }
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const account = await getOrCreateAccount(userId);
 
 const vaguePattern = /^(get my life|be more productive|sort myself|adult better|become happy|be better|be happier)/i;
 const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
@@ -256,6 +285,7 @@ firstStep = parsed.first_step;
     .from("frogs")
     .insert({
       user_id: userId,
+      account_id: account.id,
       task_dump: tasks.trim(),
       frog: firstStep,
       chosen_task: chosenTask,
@@ -269,12 +299,14 @@ firstStep = parsed.first_step;
   const { error: eventsError } = await supabase.from("frog_events").insert([
     {
       user_id: userId,
+      account_id: account.id,
       frog_id: savedFrog.id,
       event_type: "swamp_dumped",
       raw_tasks: tasks.trim(),
     },
     {
       user_id: userId,
+      account_id: account.id,
       frog_id: savedFrog.id,
       event_type: "frog_assigned",
       raw_tasks: tasks.trim(),

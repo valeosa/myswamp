@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Link from "next/link";
 import "./globals.css";
 
 
@@ -53,6 +54,9 @@ export default function RootLayout({
         </Show>
 
         <Show when="signed-in">
+          <Link href="/preferences" className="text-xs text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
+            preferences
+          </Link>
           <UserButton
       appearance={{
       variables: {
