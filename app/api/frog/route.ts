@@ -56,12 +56,9 @@ export async function GET() {
 
 async function chooseFrog(req: Request) {
   const { userId } = await auth();
-
-    if (!userId) {
-      return Response.json({ error: "Not signed in" }, { status: 401 });
-}
-
-  const rateLimit = checkRateLimit(`frog:${userId}`, 10, 10 * 60 * 1000);
+  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const visitorKey = userId ?? `guest:${forwardedFor || "unknown"}`;
+  const rateLimit = checkRateLimit(`frog:${visitorKey}`, userId ? 10 : 3, 10 * 60 * 1000);
   if (!rateLimit.allowed) {
     return Response.json(
       { error: "The swamp needs a moment. Try again soon." },
@@ -92,7 +89,6 @@ async function chooseFrog(req: Request) {
   }
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const account = await getOrCreateAccount(userId);
 
 const vaguePattern = /^(get my life|be more productive|sort myself|adult better|become happy|be better|be happier)/i;
 const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
@@ -298,6 +294,19 @@ chosenTask = parsed.chosen_task;
 firstStep = parsed.first_step;
 }
 
+  // Guests can try the frog picker without exposing the OpenAI key or
+  // creating orphaned database rows. Signing in adds durable memory.
+  if (!userId) {
+    return Response.json({
+      id: null,
+      chosen_task: chosenTask,
+      first_step: firstStep,
+      frog: firstStep,
+      guest: true,
+    });
+  }
+
+  const account = await getOrCreateAccount(userId);
   const supabase = getSupabaseAdmin();
   const { data: savedFrog, error: frogError } = await supabase
     .from("frogs")

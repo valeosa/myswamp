@@ -50,9 +50,27 @@ summary {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes mist-pass {
-  0% { opacity: 0.7; transform: scaleX(1); transform-origin: right; }
-  100% { opacity: 0; transform: scaleX(0); transform-origin: right; }
+@keyframes rise-from-water {
+  0% { opacity: 0.08; transform: translateY(12px) scale(0.985); clip-path: inset(100% 0 0 0 round 16px); }
+  65% { opacity: 0.72; }
+  100% { opacity: 1; transform: translateY(0) scale(1); clip-path: inset(0 0 0 0 round 16px); }
+}
+
+@keyframes water-whisper {
+  0% { opacity: 0; transform: translateY(-5px); letter-spacing: 0.08em; }
+  55% { opacity: 0.45; }
+  100% { opacity: 1; transform: translateY(0); letter-spacing: normal; }
+}
+
+@keyframes ripple-bloom {
+  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.82); border-radius: 46% 54% 48% 52%; }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.035); border-radius: 53% 47% 55% 45%; }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); border-radius: 999px; }
+}
+
+@keyframes veil-settle {
+  from { background-color: rgba(1, 7, 3, 0); }
+  to { background-color: rgba(1, 7, 3, 0.78); }
 }
 
 .page-surface {
@@ -61,29 +79,36 @@ summary {
 
 .mist-reveal {
   position: relative;
-  animation: surface-from-mist 620ms ease-out both;
-}
-
-.mist-reveal::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  z-index: 30;
-  border-radius: inherit;
-  background: #405143;
-  pointer-events: none;
-  animation: mist-pass 700ms ease-out both;
+  animation: rise-from-water 720ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
 }
 
 .mist-toast {
-  animation: surface-from-mist 360ms ease-out both;
+  left: 50%;
+  right: auto;
+  animation: ripple-bloom 520ms cubic-bezier(0.18, 0.8, 0.25, 1) both;
+}
+
+.water-whisper {
+  animation: water-whisper 650ms ease-out both;
+}
+
+.swamp-message,
+.swamp-dialog {
+  animation: rise-from-water 560ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+
+.swamp-veil {
+  animation: veil-settle 420ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page-surface,
   .mist-reveal,
-  .mist-reveal::after,
-  .mist-toast {
+  .mist-toast,
+  .water-whisper,
+  .swamp-message,
+  .swamp-dialog,
+  .swamp-veil {
     animation: none;
   }
 }

@@ -79,7 +79,7 @@ export default function Home() {
   const dumpIsTooLarge = tasks.length > MAX_DUMP_LENGTH || taskCount > MAX_TASKS
 
   async function pickFrog() {
-    if (!isLoaded || !isSignedIn || !tasks.trim() || frog || dumpIsTooLarge) return
+    if (!isLoaded || !tasks.trim() || frog || dumpIsTooLarge) return
 
     setLoading(true)
     setError('')
@@ -94,7 +94,7 @@ export default function Home() {
 
       if (!response.ok) throw new Error(data.error || 'The swamp could not choose a frog.')
 
-      setFrogId(data.id)
+      setFrogId(data.id ?? '')
       setChosenTask(data.chosen_task ?? '')
       setFrog(data.frog)
     } catch (reason) {
@@ -105,6 +105,18 @@ export default function Home() {
   }
 
   async function settleFrog(eventType: 'frog_completed' | 'frog_not_completed') {
+    if (!isSignedIn) {
+      if (eventType === 'frog_completed') {
+        setTasks('')
+        setReliefMessage(true)
+        window.setTimeout(() => setReliefMessage(false), 1800)
+      }
+      setFrog('')
+      setFrogId('')
+      setChosenTask('')
+      return
+    }
+
     if (!frogId) {
       setError('This frog is missing its memory. Choose a fresh frog and try again.')
       return
@@ -181,20 +193,20 @@ export default function Home() {
         </div>
 
         {taskBoxActive && (
-          <div className="mist-reveal flex justify-between text-xs text-[#718b75]">
+          <div className="water-whisper flex justify-between text-xs text-[#718b75]">
             <span>{taskCount}/{MAX_TASKS} tadpoles</span>
             <span>{tasks.length.toLocaleString()}/{MAX_DUMP_LENGTH.toLocaleString()}</span>
           </div>
         )}
 
         {dumpIsTooLarge && (
-          <p role="alert" className="text-center text-sm text-[#d0ae82]">
+          <p role="alert" className="swamp-message text-center text-sm text-[#d0ae82]">
             This swamp is a little crowded. Keep it to {MAX_TASKS} tasks and {MAX_DUMP_LENGTH.toLocaleString()} characters.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">
+          <p role="alert" className="swamp-message rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">
             {error}
           </p>
         )}
@@ -202,7 +214,7 @@ export default function Home() {
         {!frog && (
           <button
             onClick={pickFrog}
-            disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
+            disabled={!isLoaded || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
             {loading ? 'choosing your frog...' : 'into the swamp'}
@@ -265,7 +277,7 @@ export default function Home() {
         )}
 
         {reliefMessage && (
-          <div role="status" className="mist-toast fixed inset-x-0 top-1/2 z-50 mx-auto w-fit -translate-y-1/2 rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
+          <div role="status" className="mist-toast fixed left-1/2 top-1/2 z-50 w-fit rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
             it’s lighter now.
           </div>
         )}

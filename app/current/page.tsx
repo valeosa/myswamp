@@ -100,7 +100,7 @@ export default function CurrentPage() {
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
         {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
-        {error && <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
+        {error && <p role="alert" className="swamp-message rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
 
         {!loading && isSignedIn && !error && !active && pending.length === 0 && (
           <div className="py-24 text-center text-[#718b75]">
@@ -150,7 +150,7 @@ export default function CurrentPage() {
       </div>
 
       {reliefMessage && (
-        <div role="status" className="mist-toast fixed inset-x-0 top-1/2 z-50 mx-auto w-fit -translate-y-1/2 rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
+        <div role="status" className="mist-toast fixed left-1/2 top-1/2 z-50 w-fit rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
           it’s lighter now.
         </div>
       )}

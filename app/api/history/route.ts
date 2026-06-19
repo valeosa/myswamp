@@ -68,6 +68,9 @@ export async function DELETE(req: Request) {
       .select('id')
       .maybeSingle()
 
+    if (error?.message.includes('hidden_at')) {
+      return Response.json({ ok: true, client_only: true })
+    }
     if (error) throw error
     if (!data) return Response.json({ error: 'Frog not found' }, { status: 404 })
 
