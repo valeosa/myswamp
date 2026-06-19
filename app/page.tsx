@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { parseTasks } from '@/lib/tasks'
 
@@ -10,6 +10,7 @@ const MAX_TASKS = 25
 
 export default function Home() {
   const { userId, isLoaded, isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
   const [tasks, setTasks] = useState('')
   const [frog, setFrog] = useState('')
   const [frogId, setFrogId] = useState('')
@@ -139,14 +140,14 @@ export default function Home() {
       <div className="w-full max-w-xl space-y-6">
         <Link
           href="/history"
-          className="fixed bottom-6 right-6 text-[#8fa66c] text-sm font-mono opacity-70 hover:opacity-100"
+          className="fixed bottom-6 right-6 text-[#8fa66c] text-sm opacity-70 hover:opacity-100"
         >
           the water’s memory
         </Link>
 
         <div className="space-y-1 text-center">
           <h1 className="text-[#dfe8d8] text-xl font-semibold tracking-tight">dump your tasks</h1>
-          <p className="text-sm text-[#8fa66c]">the swamp picks one small thing to do next.</p>
+          <p className="text-sm text-[#8fa66c]">the swamp picks one thing to do next.</p>
         </div>
 
         <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
@@ -188,8 +189,14 @@ export default function Home() {
 
         {!frog && (
           <button
-            onClick={pickFrog}
-            disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
+            onClick={() => {
+              if (!isSignedIn) {
+                openSignIn()
+                return
+              }
+              pickFrog()
+            }}
+            disabled={!isLoaded || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
             {loading ? 'choosing your frog...' : 'into the swamp'}
