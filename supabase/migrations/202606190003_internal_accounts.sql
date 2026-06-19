@@ -34,8 +34,8 @@ from public.app_users users
 where events.account_id is null
   and users.clerk_user_id = events.user_id;
 
-alter table public.frogs alter column account_id set not null;
-alter table public.frog_events alter column account_id set not null;
+-- Keep account_id nullable for legacy rows that were recorded before auth was
+-- connected. All new writes include account_id at the authenticated API layer.
 
 do $$
 begin
