@@ -74,10 +74,10 @@ export default function PreferencesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07100b] text-white p-6 pt-24">
+    <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 text-[#c8d8b8]">
       <div className="mx-auto max-w-xl space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#b7c89b]">preferences</h1>
+          <h1 className="text-2xl font-semibold text-[#c8d8b8]">preferences</h1>
           <p className="mt-1 text-sm text-[#718067]">you choose what travels beyond the swamp.</p>
         </div>
 
@@ -99,14 +99,14 @@ export default function PreferencesPage() {
             <PreferenceToggle
               checked={preferences.deep_swamp_notifications}
               onChange={() => toggle('deep_swamp_notifications')}
-              title="Deep Swamp launch"
+              title="Deep Swamp (Coming Soon)"
               description="one message when Deep Swamp is ready"
             />
             <PreferenceToggle
               checked={preferences.feedback_contact}
               onChange={() => toggle('feedback_contact')}
               title="feedback"
-              description="it’s okay to ask how the swamp is feeling"
+              description="report how the swamp is feeling"
             />
 
             {error && <p role="alert" className="text-sm text-[#e2c2a8]">{error}</p>}
@@ -141,7 +141,7 @@ function PreferenceToggle({
   return (
     <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-lime-900/40 bg-[#0b1710] p-4 transition-colors hover:border-[#38522e]">
       <span>
-        <span className="block text-[#dfe8d8]">{title}</span>
+        <span className="block text-[#c8d8b8]">{title}</span>
         <span className="mt-1 block text-xs text-[#718067]">{description}</span>
       </span>
       <input

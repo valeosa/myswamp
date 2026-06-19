@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
-import { getTadpoles } from '@/lib/tasks'
+import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
 
 type Frog = {
   id: string
@@ -82,14 +82,14 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07100b] p-6 pt-24 font-sans text-white">
+    <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 font-sans text-[#c8d8b8]">
       <div className="max-w-2xl mx-auto space-y-6">
         <Link href="/" className="inline-block text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
           {!isSignedIn || (!loading && frogs.length === 0) ? '← back' : '← back to swamp'}
         </Link>
 
         <div>
-          <h1 className="text-2xl font-semibold text-[#e4eddc]">the water’s memory</h1>
+          <h1 className="text-2xl font-semibold text-[#c8d8b8]">the water’s memory</h1>
           <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
         </div>
 
@@ -113,28 +113,29 @@ export default function HistoryPage() {
 
         {frogs.map((item) => {
           const tadpoles = getTadpoles(item.task_dump, item.chosen_task, item.frog)
+          const displayFrog = getDisplayFrog(item.task_dump, item.chosen_task, item.frog)
 
           return (
-            <article key={item.id} className="group relative rounded-2xl border border-lime-900/40 bg-[#0b1710] p-5 pb-12 space-y-3 transition-colors hover:border-[#38522e]">
+            <article key={item.id} className="mist-reveal group relative space-y-3 rounded-2xl border border-lime-900/40 bg-[#0b1710] p-5 pb-12 transition-colors hover:border-[#38522e]">
               <div className="flex justify-end text-xs text-[#8fa66c]">
                 <span>finished</span>
               </div>
 
               <div>
                 <p className="text-[#8fa66c] text-sm">frog</p>
-                <p>{item.chosen_task || item.frog}</p>
+                <p className="text-[#c8d8b8]">{displayFrog}</p>
               </div>
 
-              {item.chosen_task && (
-                <details className="text-sm text-[#d7ddd2]">
-                  <summary className="cursor-pointer text-[#718067] transition-colors hover:text-[#a7b69a]">your one small action</summary>
+              {displayFrog !== item.frog && (
+                <details className="text-sm text-[#b7c9aa]">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />your one small action</summary>
                   <p className="mt-2 pl-4">{item.frog}</p>
                 </details>
               )}
 
               {tadpoles.length > 0 && (
                 <details className="text-sm text-[#aab5a2]">
-                  <summary className="cursor-pointer text-[#718067] transition-colors hover:text-[#a7b69a]">tadpoles</summary>
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />tadpoles</summary>
                   <ul className="mt-2 pl-4 space-y-1">
                     {tadpoles.map((tadpole, index) => <li key={`${tadpole}-${index}`}>{tadpole}</li>)}
                   </ul>
@@ -163,8 +164,8 @@ export default function HistoryPage() {
 
       {frogToHide && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6 shadow-2xl">
-            <h2 id="hide-frog-title" className="text-lg text-[#dfe8d8]">let this frog sink?</h2>
+          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="mist-reveal w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6">
+            <h2 id="hide-frog-title" className="text-lg text-[#c8d8b8]">let this frog sink?</h2>
             <p className="mt-3 text-sm leading-6 text-[#8fa087]">the swamp still remembers, but it won’t be displayed here.</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
@@ -188,5 +189,13 @@ export default function HistoryPage() {
         </div>
       )}
     </main>
+  )
+}
+
+function LilyIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 14" className="h-3 w-4 fill-current opacity-80">
+      <path d="M1 8.5C3.8 2.5 10.8.4 17 3.4c-1.2 1.1-2.3 2-3.4 2.8L19 8.8C14 13.2 5.8 13.4 1 8.5Z" />
+    </svg>
   )
 }

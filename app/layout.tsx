@@ -40,7 +40,7 @@ export default function RootLayout({
       <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
         <Show when="signed-out">
           <SignInButton>
-            <button className="h-10 px-3 rounded-full text-sm text-[#dfe8d8] cursor-pointer transition-colors duration-200 hover:bg-[#17251b] hover:text-white">
+            <button className="h-10 px-3 rounded-full text-sm text-[#c8d8b8] cursor-pointer transition-colors duration-200 hover:bg-[#17251b] hover:text-[#d6e3ca]">
               Sign in
             </button>
           </SignInButton>

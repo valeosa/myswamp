@@ -11,6 +11,13 @@ function comparableTask(task: string) {
   return task.toLocaleLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
 }
 
+export function getDisplayFrog(taskDump: string, chosenTask: string | null, frogText: string) {
+  if (chosenTask) return chosenTask
+
+  const tasks = parseTasks(taskDump)
+  return tasks.length === 1 ? tasks[0] : frogText
+}
+
 export function getTadpoles(taskDump: string, chosenTask: string | null, frogText?: string) {
   const tasks = parseTasks(taskDump)
   const selectedTask = chosenTask || frogText

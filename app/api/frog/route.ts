@@ -16,7 +16,7 @@ export async function GET() {
 
     const account = await getOrCreateAccount(userId);
     const supabase = getSupabaseAdmin();
-    const [activeFrog, pendingFrogs] = await Promise.all([
+    const [activeFrog, pendingFrogs, rememberedFrogs] = await Promise.all([
       supabase
         .from("frogs")
         .select("id, task_dump, frog, chosen_task, created_at")
@@ -30,11 +30,21 @@ export async function GET() {
         .select("id", { count: "exact", head: true })
         .eq("account_id", account.id)
         .eq("status", "not_completed"),
+      supabase
+        .from("frogs")
+        .select("id", { count: "exact", head: true })
+        .eq("account_id", account.id)
+        .in("status", ["completed", "not_completed"]),
     ]);
 
     if (activeFrog.error) throw activeFrog.error;
     if (pendingFrogs.error) throw pendingFrogs.error;
-    return Response.json({ frog: activeFrog.data, pending_count: pendingFrogs.count ?? 0 });
+    if (rememberedFrogs.error) throw rememberedFrogs.error;
+    return Response.json({
+      frog: activeFrog.data,
+      pending_count: pendingFrogs.count ?? 0,
+      has_memory: (rememberedFrogs.count ?? 0) > 0,
+    });
   } catch (error) {
     console.error("active frog lookup failed", error);
     return Response.json(

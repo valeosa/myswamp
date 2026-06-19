@@ -15,18 +15,19 @@ export default function Home() {
   const [frog, setFrog] = useState('')
   const [frogId, setFrogId] = useState('')
   const [chosenTask, setChosenTask] = useState('')
-  const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [showFrog, setShowFrog] = useState(false)
   const [error, setError] = useState('')
   const [hydrated, setHydrated] = useState(false)
   const [restoringFrog, setRestoringFrog] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
+  const [taskBoxActive, setTaskBoxActive] = useState(false)
+  const [hasMemory, setHasMemory] = useState(false)
+  const [reliefMessage, setReliefMessage] = useState(false)
 
   useEffect(() => {
     queueMicrotask(() => {
       setTasks(localStorage.getItem('tasks') ?? '')
-      setStreak(Number(localStorage.getItem('streak') ?? 0))
+      setHasMemory(localStorage.getItem('hasMemory') === 'true')
       localStorage.removeItem('frog')
       localStorage.removeItem('frogId')
       localStorage.removeItem('chosenTask')
@@ -35,7 +36,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => { if (hydrated) localStorage.setItem('tasks', tasks) }, [hydrated, tasks])
-  useEffect(() => { if (hydrated) localStorage.setItem('streak', String(streak)) }, [hydrated, streak])
+  useEffect(() => { if (hydrated) localStorage.setItem('hasMemory', String(hasMemory)) }, [hasMemory, hydrated])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -54,13 +55,13 @@ export default function Home() {
         if (cancelled) return
 
         setPendingCount(data.pending_count ?? 0)
+        setHasMemory(Boolean(data.has_memory))
         if (!data.frog) return
 
         setFrogId(data.frog.id)
         setTasks(data.frog.task_dump)
         setChosenTask(data.frog.chosen_task ?? '')
         setFrog(data.frog.frog)
-        setShowFrog(true)
       } catch (reason) {
         if (!cancelled) {
           setError(reason instanceof Error ? reason.message : 'The swamp could not find your resting frog.')
@@ -93,11 +94,9 @@ export default function Home() {
 
       if (!response.ok) throw new Error(data.error || 'The swamp could not choose a frog.')
 
-      setShowFrog(false)
       setFrogId(data.id)
       setChosenTask(data.chosen_task ?? '')
       setFrog(data.frog)
-      requestAnimationFrame(() => setShowFrog(true))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'The swamp is a little foggy. Please try again.')
     } finally {
@@ -124,16 +123,18 @@ export default function Home() {
       if (!response.ok) throw new Error(data.error || 'The swamp could not remember that.')
 
       if (eventType === 'frog_completed') {
-        setStreak((current) => current + 1)
         setTasks('')
+        setReliefMessage(true)
+        window.setTimeout(() => setReliefMessage(false), 1800)
       } else {
         setPendingCount((current) => current + 1)
       }
 
+      setHasMemory(true)
+
       setFrog('')
       setFrogId('')
       setChosenTask('')
-      setShowFrog(false)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'The swamp could not remember that. Please try again.')
     } finally {
@@ -142,26 +143,27 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a1710] text-white flex flex-col items-center justify-center p-6 relative">
+    <main className="page-surface relative flex min-h-screen flex-col items-center justify-center bg-[#0a1710] p-6 pb-24 text-[#c8d8b8] sm:pb-6">
       <div className="w-full max-w-xl space-y-6">
-        <nav className="fixed bottom-6 right-6 flex gap-5 text-sm text-[#8fa66c]">
-          <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>
-          <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</Link>
-        </nav>
-
         <div className="space-y-1 text-center">
-          <h1 className="text-[#dfe8d8] text-xl font-semibold tracking-tight">dump your tasks</h1>
-          <p className="text-sm text-[#8fa66c]">the swamp picks one thing to do next.</p>
+          <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">dump your tasks</h1>
+          {!isSignedIn && !frog && <p className="text-sm italic text-[#8fa66c]">the swamp surfaces one thing to do next.</p>}
         </div>
 
         <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
           <SwampScenery />
 
           {!tasks && (
-            <div className="absolute top-4 left-4 z-10 pointer-events-none font-sans text-zinc-700">
-              <div>follow up on my cold email</div>
-              <div>return my amazon package</div>
-              <div>ask for the week 4 notes...</div>
+            <div className="absolute left-4 top-4 z-10 pointer-events-none font-sans text-[#66735f]">
+              {isSignedIn ? (
+                <div>dump your tasks</div>
+              ) : (
+                <>
+                  <div>follow up on my cold email</div>
+                  <div>return my amazon package</div>
+                  <div>ask for the week 4 notes...</div>
+                </>
+              )}
             </div>
           )}
 
@@ -169,15 +171,19 @@ export default function Home() {
             aria-label="Your task dump"
             value={tasks}
             onChange={(event) => setTasks(event.target.value)}
+            onFocus={() => setTaskBoxActive(true)}
+            onBlur={() => setTaskBoxActive(false)}
             disabled={Boolean(frog) || loading || restoringFrog}
-            className="relative z-20 block w-full h-full p-4 bg-transparent text-white rounded-xl outline-none resize-none disabled:opacity-60"
+            className="relative z-20 block h-full w-full resize-none rounded-xl bg-transparent p-4 text-[#c8d8b8] outline-none caret-[#9fb77b] disabled:opacity-60"
           />
         </div>
 
-        <div className="flex justify-between text-xs text-[#62705b]">
-          <span>{taskCount}/{MAX_TASKS} tadpoles</span>
-          <span>{tasks.length.toLocaleString()}/{MAX_DUMP_LENGTH.toLocaleString()}</span>
-        </div>
+        {taskBoxActive && (
+          <div className="mist-reveal flex justify-between text-xs text-[#718b75]">
+            <span>{taskCount}/{MAX_TASKS} tadpoles</span>
+            <span>{tasks.length.toLocaleString()}/{MAX_DUMP_LENGTH.toLocaleString()}</span>
+          </div>
+        )}
 
         {dumpIsTooLarge && (
           <p role="alert" className="text-center text-sm text-[#d0ae82]">
@@ -212,17 +218,17 @@ export default function Home() {
         )}
 
         {frog && (
-          <div className={`space-y-3 transition-all duration-500 ${showFrog ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+          <div key={frogId} className="mist-reveal space-y-3">
             {taskCount > 1 && chosenTask && (
               <div className="p-4 rounded-2xl bg-[#0b120e] border border-[#33452d]/50">
                 <div className="text-[#7f8f73] text-xs mb-2">frog</div>
-                <div className="text-[#e6eadf]">{chosenTask}</div>
+                <div className="text-[#c8d8b8]">{chosenTask}</div>
               </div>
             )}
 
             <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50">
               <div className="text-[#7f8f73] text-xs mb-2">start here</div>
-              <div className="text-[#e6eadf] text-lg">{frog}</div>
+              <div className="text-lg text-[#c8d8b8]">{frog}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -236,13 +242,12 @@ export default function Home() {
               <button
                 onClick={() => settleFrog('frog_not_completed')}
                 disabled={loading}
-                className="py-4 rounded-2xl border border-[#33452d]/50 text-[#8fa66c] transition hover:bg-[#111713] disabled:opacity-40"
+                className="py-4 rounded-2xl border border-[#33452d]/50 text-[#9db286] transition-colors hover:bg-[#647b51] hover:text-[#10140c] disabled:opacity-40"
               >
                 not yet
               </button>
             </div>
 
-            <div className="text-sm text-[#7f8f73] text-center">frogs cleared: {streak}</div>
           </div>
         )}
 
@@ -250,6 +255,23 @@ export default function Home() {
           <Link href="/current" className="block text-center text-sm text-[#8fa66c] opacity-80 transition-opacity hover:opacity-100">
             {pendingCount === 1 ? 'one frog pending' : `${pendingCount} frogs pending`}
           </Link>
+        )}
+
+        {(isSignedIn || hasMemory) && (
+          <nav className="mt-10 flex justify-center gap-5 text-sm text-[#8fa66c] sm:fixed sm:bottom-6 sm:right-6 sm:mt-0">
+            {isSignedIn && <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>}
+            {hasMemory && (
+              isSignedIn
+                ? <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</Link>
+                : <button type="button" onClick={() => openSignIn()} className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
+            )}
+          </nav>
+        )}
+
+        {reliefMessage && (
+          <div role="status" className="mist-toast fixed inset-x-0 top-1/2 z-50 mx-auto w-fit -translate-y-1/2 rounded-full border border-[#496047] bg-[#0c1b12] px-6 py-3 text-[#c8d8b8]">
+            it’s lighter now.
+          </div>
         )}
       </div>
     </main>
@@ -264,13 +286,6 @@ function SwampScenery() {
       preserveAspectRatio="none"
       className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
     >
-      <defs>
-        <linearGradient id="water-haze" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#9bb995" stopOpacity="0.02" />
-          <stop offset="1" stopColor="#78936f" stopOpacity="0.12" />
-        </linearGradient>
-      </defs>
-
       <g fill="none" stroke="#829b78" strokeLinecap="round" opacity="0.2">
         <path d="M16 -4 C18 24 8 39 18 68" />
         <path d="M35 -5 C35 28 24 47 29 82" />
@@ -286,7 +301,7 @@ function SwampScenery() {
         <ellipse cx="570" cy="58" rx="5" ry="2" transform="rotate(-30 570 58)" />
       </g>
 
-      <path d="M0 126 C110 117 180 139 290 128 C410 116 490 136 600 123 L600 160 L0 160 Z" fill="url(#water-haze)" />
+      <path d="M0 126 C110 117 180 139 290 128 C410 116 490 136 600 123 L600 160 L0 160 Z" fill="#78936f" opacity="0.1" />
 
       <g fill="#476d43" opacity="0.42">
         <ellipse cx="82" cy="141" rx="17" ry="5" transform="rotate(-7 82 141)" />
