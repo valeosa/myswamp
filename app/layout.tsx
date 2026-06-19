@@ -40,9 +40,13 @@ export default function RootLayout({
     <body className={mono.className}>
       <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
         <Show when="signed-out">
-          <SignInButton />
+          <SignInButton>
+            <button className="h-10 px-3 rounded-full text-sm text-[#dfe8d8] cursor-pointer transition-colors duration-200 hover:bg-[#17251b] hover:text-white">
+              Sign in
+            </button>
+          </SignInButton>
           <SignUpButton>
-            <button className="bg-[#8fa66c] text-[#0a1710] rounded-full font-medium text-sm h-10 px-4 cursor-pointer">
+            <button className="bg-[#8fa66c] text-[#0a1710] rounded-full font-medium text-sm h-10 px-4 cursor-pointer transition-all duration-200 hover:bg-[#b2c791] hover:scale-[1.03] active:scale-95">
               Sign up
             </button>
           </SignUpButton>

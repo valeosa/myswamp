@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { parseTasks } from "@/lib/tasks";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
@@ -35,7 +36,7 @@ async function chooseFrog(req: Request) {
     );
   }
 
-  const taskLines = tasks.split('\n').filter((t: string) => t.trim() !== '');
+  const taskLines = parseTasks(tasks);
 
   if (taskLines.length > MAX_TASKS) {
     return Response.json(
@@ -59,7 +60,7 @@ if (isVague) {
   firstStep = "open your notes app and type whatever is sitting heaviest right now";
 } else {
 
-const tasksToSend = tasks;
+const tasksToSend = taskLines.join("\n");
 
   const systemPrompt = `
 
@@ -215,7 +216,7 @@ Good: pick up one item from the floor
 
 Now choose the frog for this task dump:
 
-${tasks}
+${tasksToSend}
 `;;
 
   const completion = await client.chat.completions.create({
@@ -241,7 +242,7 @@ try {
   parsed = JSON.parse(output || "");
 } catch {
   parsed = {
-    chosen_task: tasks.split("\n").find((t: string) => t.trim()) || "your task",
+    chosen_task: taskLines[0] || "your task",
     first_step: output || "touch the first object involved",
   };
 }

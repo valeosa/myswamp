@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
+import { parseTasks } from '@/lib/tasks'
 
 const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
@@ -40,7 +41,7 @@ export default function Home() {
   useEffect(() => { if (hydrated) localStorage.setItem('chosenTask', chosenTask) }, [chosenTask, hydrated])
   useEffect(() => { if (hydrated) localStorage.setItem('streak', String(streak)) }, [hydrated, streak])
 
-  const taskCount = tasks.split('\n').filter((task) => task.trim()).length
+  const taskCount = parseTasks(tasks).length
   const dumpIsTooLarge = tasks.length > MAX_DUMP_LENGTH || taskCount > MAX_TASKS
 
   async function pickFrog() {
@@ -144,10 +145,6 @@ export default function Home() {
           <span>{tasks.length.toLocaleString()}/{MAX_DUMP_LENGTH.toLocaleString()}</span>
         </div>
 
-        {!isSignedIn && isLoaded && (
-          <p className="text-center text-sm text-[#9eaa94]">sign in above so the swamp can remember you.</p>
-        )}
-
         {dumpIsTooLarge && (
           <p role="alert" className="text-center text-sm text-[#d0ae82]">
             This swamp is a little crowded. Keep it to {MAX_TASKS} tasks and {MAX_DUMP_LENGTH.toLocaleString()} characters.
@@ -166,8 +163,12 @@ export default function Home() {
             disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading}
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
-            {loading ? 'choosing your frog...' : 'pick my frog'}
+            {loading ? 'choosing your frog...' : 'into the swamp'}
           </button>
+        )}
+
+        {!frog && tasks.trim() && !isSignedIn && isLoaded && (
+          <p className="text-center text-sm text-[#9eaa94]">sign in above so the swamp can remember you.</p>
         )}
 
         {frog && (
