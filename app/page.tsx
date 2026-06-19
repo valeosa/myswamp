@@ -115,9 +115,8 @@ export default function Home() {
           the water’s memory
         </Link>
 
-        <div className="space-y-1 text-center">
+        <div className="text-center">
           <h1 className="text-[#dfe8d8] text-xl font-semibold tracking-tight">dump your tasks</h1>
-          <p className="text-[#7f8f73] text-sm">get one small frog. nothing else for now.</p>
         </div>
 
         <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
