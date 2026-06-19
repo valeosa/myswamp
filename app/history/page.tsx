@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
+import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
 
 type Frog = {
@@ -179,7 +180,7 @@ export default function HistoryPage() {
         })}
       </div>
 
-      {frogToHide && (
+      {frogToHide && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6" role="presentation">
           <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6">
             <h2 id="hide-frog-title" className="text-lg text-[#c8d8b8]">let this frog sink?</h2>
@@ -203,7 +204,8 @@ export default function HistoryPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </main>
   )
