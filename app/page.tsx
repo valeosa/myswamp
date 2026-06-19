@@ -145,10 +145,12 @@ export default function Home() {
   return (
     <main className="page-surface relative flex min-h-screen flex-col items-center justify-center bg-[#0a1710] p-6 pb-24 text-[#c8d8b8] sm:pb-6">
       <div className="w-full max-w-xl space-y-6">
-        <div className="space-y-1 text-center">
-          <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">dump your tasks</h1>
-          {!isSignedIn && !frog && <p className="text-sm italic text-[#8fa66c]">the swamp surfaces one thing to do next.</p>}
-        </div>
+        {isLoaded && !isSignedIn && (
+          <div className="space-y-1 text-center">
+            <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">dump your tasks,</h1>
+            {!frog && <p className="text-sm italic text-[#8fa66c]">the swamp surfaces one thing to do next.</p>}
+          </div>
+        )}
 
         <div className="swamp-panel relative w-full h-40 rounded-xl overflow-hidden">
           <SwampScenery />
@@ -156,7 +158,7 @@ export default function Home() {
           {!tasks && (
             <div className="absolute left-4 top-4 z-10 pointer-events-none font-sans text-[#66735f]">
               {isSignedIn ? (
-                <div>dump your tasks</div>
+                <div>dump your tasks...</div>
               ) : (
                 <>
                   <div>follow up on my cold email</div>
@@ -199,14 +201,8 @@ export default function Home() {
 
         {!frog && (
           <button
-            onClick={() => {
-              if (!isSignedIn) {
-                openSignIn()
-                return
-              }
-              pickFrog()
-            }}
-            disabled={!isLoaded || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
+            onClick={pickFrog}
+            disabled={!isLoaded || !isSignedIn || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
             {loading ? 'choosing your frog...' : 'into the swamp'}

@@ -105,7 +105,6 @@ export default function CurrentPage() {
         {!loading && isSignedIn && !error && !active && pending.length === 0 && (
           <div className="py-24 text-center text-[#718b75]">
             <p className="text-xl">nothing waiting.</p>
-            <p className="mt-3 text-sm italic">the water is still.</p>
           </div>
         )}
 
