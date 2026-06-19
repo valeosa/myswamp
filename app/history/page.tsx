@@ -90,14 +90,14 @@ export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-[#07100b] p-6 pt-24 font-sans text-white">
       <div className="max-w-2xl mx-auto space-y-6">
+        <Link href="/" className="inline-block text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
+          {!isSignedIn || (!loading && frogs.length === 0) ? '← back' : '← back to swamp'}
+        </Link>
+
         <div>
           <h1 className="text-2xl font-semibold text-[#e4eddc]">the water’s memory</h1>
           <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
         </div>
-
-        <Link href="/" className="inline-block text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
-          ← back to swamp
-        </Link>
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
         {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
