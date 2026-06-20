@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
+import {
+  isMemoryContextSelection,
+  memoryContextOptions,
+  type MemoryContextSelection,
+} from '@/lib/memory-context'
 
 type Frog = {
   id: string
@@ -17,6 +22,16 @@ type Frog = {
 }
 
 const HIDDEN_FROGS_KEY = 'hiddenFrogIds'
+const memorySections: Array<{
+  key: keyof MemoryContextSelection
+  label: string
+  options: readonly string[]
+}> = [
+  { key: 'season', label: 'season', options: memoryContextOptions.season },
+  { key: 'life_context', label: 'life context', options: memoryContextOptions.life_context },
+  { key: 'energy', label: 'energy', options: memoryContextOptions.energy },
+  { key: 'moment', label: 'moment', options: memoryContextOptions.moment },
+]
 
 function locallyHiddenFrogs() {
   try {
@@ -43,11 +58,17 @@ function readableDate(value: string) {
 
 export default function HistoryPage() {
   const { isLoaded, isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
   const [frogs, setFrogs] = useState<Frog[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [frogToHide, setFrogToHide] = useState<Frog | null>(null)
   const [error, setError] = useState('')
+  const [markPanelOpen, setMarkPanelOpen] = useState(false)
+  const [waterContext, setWaterContext] = useState<Partial<MemoryContextSelection>>({})
+  const [savingMark, setSavingMark] = useState(false)
+  const [markError, setMarkError] = useState('')
+  const [waterMessage, setWaterMessage] = useState('')
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return
@@ -99,6 +120,42 @@ export default function HistoryPage() {
     }
   }
 
+  function openMarkPanel() {
+    if (!isSignedIn) {
+      openSignIn()
+      return
+    }
+
+    setMarkError('')
+    setMarkPanelOpen(true)
+  }
+
+  async function saveWaterContext() {
+    if (!isMemoryContextSelection(waterContext)) return
+
+    setSavingMark(true)
+    setMarkError('')
+
+    try {
+      const response = await fetch('/api/memory-contexts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(waterContext),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'The water could not hold that mark.')
+
+      setWaterContext({})
+      setMarkPanelOpen(false)
+      setWaterMessage('the water remembers.')
+      window.setTimeout(() => setWaterMessage(''), 2800)
+    } catch (reason) {
+      setMarkError(reason instanceof Error ? reason.message : 'The water could not hold that mark.')
+    } finally {
+      setSavingMark(false)
+    }
+  }
+
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 font-sans text-[#c8d8b8]">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -106,10 +163,23 @@ export default function HistoryPage() {
           {!isSignedIn || (!loading && frogs.length === 0) ? '← back' : '← back to swamp'}
         </Link>
 
-        <div>
-          <h1 className="text-2xl font-semibold text-[#c8d8b8]">the water’s memory</h1>
-          <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-[#c8d8b8]">the water’s memory</h1>
+            <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
+          </div>
+          {isLoaded && (
+            <button
+              type="button"
+              onClick={openMarkPanel}
+              className="shrink-0 rounded-full border border-[#40573d] px-4 py-2 text-xs text-[#9fb77b] transition-colors hover:bg-[#142018] hover:text-[#c8d8b8]"
+            >
+              mark the water
+            </button>
+          )}
         </div>
+
+        {waterMessage && <p role="status" className="water-whisper text-sm italic text-[#8fa66c]">{waterMessage}</p>}
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
         {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
@@ -203,6 +273,76 @@ export default function HistoryPage() {
                 {deleting ? 'sinking...' : 'let it sink'}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {markPanelOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 sm:p-6" role="presentation">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mark-water-title"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-3xl border border-[#3f5437] bg-[#09140d] p-5 shadow-2xl shadow-black/40 sm:p-7"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="mark-water-title" className="text-xl font-medium text-[#c8d8b8]">mark the water</h2>
+                <p className="mt-1 text-sm italic text-[#718b75]">what is life moving through right now?</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMarkPanelOpen(false)}
+                disabled={savingMark}
+                aria-label="Close"
+                className="rounded-full px-2 py-1 text-lg text-[#718067] transition-colors hover:text-[#c8d8b8] disabled:opacity-40"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-7 space-y-6">
+              {memorySections.map((section) => (
+                <section key={section.key} aria-labelledby={`water-${section.key}`}>
+                  <h3 id={`water-${section.key}`} className="text-xs uppercase tracking-[0.2em] text-[#718067]">
+                    {section.label}
+                  </h3>
+                  <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-labelledby={`water-${section.key}`}>
+                    {section.options.map((option) => {
+                      const selected = waterContext[section.key] === option
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setWaterContext((current) => ({ ...current, [section.key]: option }))}
+                          className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                            selected
+                              ? 'border-[#8fa66c] bg-[#8fa66c] text-[#0a1710]'
+                              : 'border-[#30442f] bg-[#0d1b12] text-[#9eaa94] hover:border-[#526b49] hover:text-[#c8d8b8]'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
+
+            {markError && <p role="alert" className="mt-6 text-sm text-[#e2c2a8]">{markError}</p>}
+
+            <button
+              type="button"
+              onClick={saveWaterContext}
+              disabled={!isMemoryContextSelection(waterContext) || savingMark}
+              className="mt-7 w-full rounded-2xl bg-[#8fa66c] px-4 py-3 text-sm font-medium text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-[0.99] disabled:opacity-30"
+            >
+              {savingMark ? 'remembering...' : 'mark this water'}
+            </button>
           </div>
         </div>,
         document.body,

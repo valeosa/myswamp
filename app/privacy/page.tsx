@@ -21,6 +21,7 @@ export default function PrivacyPage() {
           <li>Account identifiers and sign-in information handled by Clerk.</li>
           <li>Your task dumps, assigned frog, small action, completion status, and timestamps when you use a signed-in account.</li>
           <li>If you opt into Deep Swamp analysis, each task in a dump, which task became the frog, your local timezone/hour/day, and later completion or “not yet” events are stored together to look for your personal patterns.</li>
+          <li>Water marks you choose to add in memory, including season, life context, energy, moment, and when you marked them.</li>
           <li>Email and feedback preferences you choose in settings.</li>
           <li>Basic product analytics: page visits and counts of dumps, generated frogs, and completions. The first-party analytics table does not store task text, your name, email, or IP address.</li>
           <li>Technical information processed by hosting, security, and analytics providers as part of operating the service.</li>
@@ -31,6 +32,7 @@ export default function PrivacyPage() {
         <h2>how we use it</h2>
         <p>We process account and task information to provide the service you request. We use limited usage analytics and security logs for our legitimate interests in protecting, debugging, and improving mySwamp. Optional product emails rely on your consent, which you can withdraw in preferences.</p>
         <p>Deep Swamp analysis is optional and begins only after you enable it in preferences. Turning it off stops new Deep Swamp collection and removes the additional task-item and local-time context used for that analysis. Your ordinary frog history remains until you hide it or request account deletion.</p>
+        <p>Water marks are saved as part of your memory and are not attached to a single frog. If Deep Swamp analysis is enabled, they may be used as context for frogs that occurred during that period.</p>
       </section>
 
       <section>

@@ -9,6 +9,7 @@ Deep Swamp is the future personalised pattern layer for mySwamp. Its purpose is 
 - Opted-in assignments store each frog and tadpole as a separate task-item snapshot, plus local timezone, hour, weekday, and task count.
 - Opting out stops future Deep Swamp capture and deletes the extra task-item and local-time context. Ordinary frog history remains.
 - Category, deadline, obligation, and confidence columns exist but are intentionally empty until a versioned classifier is implemented and evaluated.
+- Signed-in users can “mark the water” with season, life context, energy, and moment. A mark begins an era and remains the applicable context until the next mark; it is never attached to one specific frog.
 
 ## Next collection work
 
@@ -19,6 +20,7 @@ Deep Swamp is the future personalised pattern layer for mySwamp. Its purpose is 
 - [ ] Build an internal data-quality view before showing user-facing insights.
 - [ ] Define observation windows for active, stalled, completed, and abandoned frogs.
 - [ ] Exclude active (right-censored) frogs from naive completion-time averages.
+- [ ] Join each frog to the newest water mark at or before its assignment time, without copying or mutating the frog record.
 
 ## Insight rules
 
