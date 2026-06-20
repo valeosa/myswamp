@@ -3,12 +3,46 @@ import { auth } from "@clerk/nextjs/server";
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { parseTasks } from "@/lib/tasks";
+import { parseTasks, tasksAreEquivalent } from "@/lib/tasks";
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
+const DEEP_SWAMP_CAPTURE_VERSION = "assignment-context-v1";
+
+type DeepSwampContext = {
+  timezone: string;
+  localHour: number;
+  localWeekday: number;
+};
+
+function parseDeepSwampContext(value: unknown): DeepSwampContext | null {
+  if (!value || typeof value !== "object") return null;
+
+  const { timezone, localHour, localWeekday } = value as Record<string, unknown>;
+  const timezoneIsValid = typeof timezone === "string"
+    && timezone.length <= 64
+    && (timezone === "UTC" || /^[A-Za-z_]+(?:\/[A-Za-z0-9_+.-]+)+$/.test(timezone));
+
+  if (
+    !timezoneIsValid
+    || !Number.isInteger(localHour)
+    || !Number.isInteger(localWeekday)
+    || (localHour as number) < 0
+    || (localHour as number) > 23
+    || (localWeekday as number) < 0
+    || (localWeekday as number) > 6
+  ) {
+    return null;
+  }
+
+  return {
+    timezone,
+    localHour: localHour as number,
+    localWeekday: localWeekday as number,
+  };
+}
 
 export async function GET() {
   try {
@@ -67,7 +101,9 @@ async function chooseFrog(req: Request) {
     );
   }
 
-  const { tasks } = await req.json();
+  const body = await req.json();
+  const tasks = body?.tasks;
+  const requestedContext = parseDeepSwampContext(body?.context);
 
   if (typeof tasks !== "string" || tasks.trim() === "") {
     return Response.json({ error: "Add at least one task first." }, { status: 400 });
@@ -312,6 +348,7 @@ firstStep = parsed.first_step;
   }
 
   const account = await getOrCreateAccount(userId);
+  const deepSwampContext = account.deep_swamp_analysis ? requestedContext : null;
   const supabase = getSupabaseAdmin();
   const { data: savedFrog, error: frogError } = await supabase
     .from("frogs")
@@ -322,6 +359,15 @@ firstStep = parsed.first_step;
       frog: firstStep,
       chosen_task: chosenTask,
       status: "active",
+      ...(deepSwampContext
+        ? {
+            local_timezone: deepSwampContext.timezone,
+            local_hour: deepSwampContext.localHour,
+            local_weekday: deepSwampContext.localWeekday,
+            task_count: taskLines.length,
+            deep_swamp_capture_version: DEEP_SWAMP_CAPTURE_VERSION,
+          }
+        : {}),
     })
     .select("id")
     .single();
@@ -348,6 +394,21 @@ firstStep = parsed.first_step;
   ]);
 
   if (eventsError) throw eventsError;
+
+  if (deepSwampContext) {
+    const { error: taskItemsError } = await supabase
+      .from("deep_swamp_task_items")
+      .insert(taskLines.map((taskText, position) => ({
+        frog_id: savedFrog.id,
+        account_id: account.id,
+        position,
+        task_text: taskText,
+        is_selected: tasksAreEquivalent(taskText, chosenTask),
+      })));
+
+    // Deep Swamp collection must never block the core frog experience.
+    if (taskItemsError) console.warn("Deep Swamp assignment snapshot skipped", taskItemsError);
+  }
 
   await recordFounderEvents([
     { event_name: "task_dumped" },

@@ -24,11 +24,7 @@ export default function FounderPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!isLoaded) return
-    if (!isSignedIn) {
-      setLoading(false)
-      return
-    }
+    if (!isLoaded || !isSignedIn) return
 
     fetch('/api/founder/analytics')
       .then(async (response) => {
@@ -39,6 +35,8 @@ export default function FounderPage() {
       .catch((reason) => setError(reason instanceof Error ? reason.message : 'The numbers are beneath the fog right now.'))
       .finally(() => setLoading(false))
   }, [isLoaded, isSignedIn])
+
+  const isCounting = !isLoaded || (isSignedIn && loading)
 
   const completionRate = useMemo(() => {
     if (!data?.metrics.frogGenerations.total) return 0
@@ -65,8 +63,8 @@ export default function FounderPage() {
           {data && <p className="text-sm text-[#718067]">{completionRate}% completion rate</p>}
         </div>
 
-        {loading && <p className="mt-12 text-[#8fa66c]">counting ripples...</p>}
-        {!loading && !isSignedIn && <p className="mt-12 text-[#8fa66c]">sign in with the founder account to enter.</p>}
+        {isCounting && <p className="mt-12 text-[#8fa66c]">counting ripples...</p>}
+        {isLoaded && !isSignedIn && <p className="mt-12 text-[#8fa66c]">sign in with the founder account to enter.</p>}
         {error && <p role="alert" className="mt-12 text-[#d0ae82]">{error}</p>}
 
         {data && (

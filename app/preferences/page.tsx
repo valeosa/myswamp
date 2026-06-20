@@ -7,12 +7,14 @@ import { useAuth } from '@clerk/nextjs'
 type Preferences = {
   email_updates: boolean
   deep_swamp_notifications: boolean
+  deep_swamp_analysis: boolean
   feedback_contact: boolean
 }
 
 const emptyPreferences: Preferences = {
   email_updates: false,
   deep_swamp_notifications: false,
+  deep_swamp_analysis: false,
   feedback_contact: false,
 }
 
@@ -35,6 +37,7 @@ export default function PreferencesPage() {
         setPreferences({
           email_updates: data.profile.email_updates,
           deep_swamp_notifications: data.profile.deep_swamp_notifications,
+          deep_swamp_analysis: data.profile.deep_swamp_analysis,
           feedback_contact: data.profile.feedback_contact,
         })
       } catch (reason) {
@@ -101,6 +104,12 @@ export default function PreferencesPage() {
               onChange={() => toggle('deep_swamp_notifications')}
               title="Deep Swamp (Coming Soon)"
               description="one message when Deep Swamp is ready"
+            />
+            <PreferenceToggle
+              checked={preferences.deep_swamp_analysis}
+              onChange={() => toggle('deep_swamp_analysis')}
+              title="Deep Swamp analysis"
+              description="use my frog and tadpole patterns to find personal productivity blockers"
             />
             <PreferenceToggle
               checked={preferences.feedback_contact}

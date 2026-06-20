@@ -88,7 +88,14 @@ export default function Home() {
       const response = await fetch('/api/frog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tasks }),
+        body: JSON.stringify({
+          tasks,
+          context: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            localHour: new Date().getHours(),
+            localWeekday: new Date().getDay(),
+          },
+        }),
       })
       const data = await response.json()
 

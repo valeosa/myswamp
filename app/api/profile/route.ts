@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 const preferenceKeys = [
   'email_updates',
   'deep_swamp_notifications',
+  'deep_swamp_analysis',
   'feedback_contact',
 ] as const
 
@@ -39,19 +40,44 @@ export async function PATCH(req: Request) {
 
     const account = await getOrCreateAccount(userId)
     const now = new Date().toISOString()
+    const analysisPreference = preferences.deep_swamp_analysis
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
       .from('app_users')
       .update({
         ...preferences,
+        ...(typeof analysisPreference === 'boolean'
+          ? { deep_swamp_consent_at: analysisPreference ? now : null }
+          : {}),
         email_preferences_updated_at: now,
         updated_at: now,
       })
       .eq('id', account.id)
-      .select('id, clerk_user_id, email_updates, deep_swamp_notifications, feedback_contact, email_preferences_updated_at, created_at')
+      .select('id, clerk_user_id, email_updates, deep_swamp_notifications, deep_swamp_analysis, deep_swamp_consent_at, feedback_contact, email_preferences_updated_at, created_at')
       .single()
 
     if (error) throw error
+
+    if (analysisPreference === false) {
+      const [itemsResult, frogsResult] = await Promise.all([
+        supabase.from('deep_swamp_task_items').delete().eq('account_id', account.id),
+        supabase
+          .from('frogs')
+          .update({
+            local_timezone: null,
+            local_hour: null,
+            local_weekday: null,
+            task_count: null,
+            deep_swamp_capture_version: null,
+          })
+          .eq('account_id', account.id),
+      ])
+
+      if (itemsResult.error || frogsResult.error) {
+        console.warn('Deep Swamp data cleanup was incomplete', itemsResult.error ?? frogsResult.error)
+      }
+    }
+
     return Response.json({ profile: data })
   } catch (error) {
     console.error('profile update failed', error)

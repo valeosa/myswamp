@@ -11,6 +11,15 @@ function comparableTask(task: string) {
   return task.toLocaleLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
 }
 
+export function tasksAreEquivalent(left: string, right: string) {
+  const comparableLeft = comparableTask(left)
+  const comparableRight = comparableTask(right)
+  if (!comparableLeft || !comparableRight) return false
+  return comparableLeft === comparableRight
+    || comparableLeft.includes(comparableRight)
+    || comparableRight.includes(comparableLeft)
+}
+
 export function getDisplayFrog(taskDump: string, chosenTask: string | null, frogText: string) {
   if (chosenTask) return chosenTask
 
@@ -23,14 +32,12 @@ export function getTadpoles(taskDump: string, chosenTask: string | null, frogTex
   const selectedTask = chosenTask || frogText
   if (!selectedTask) return []
 
-  const chosen = comparableTask(selectedTask)
   let removedFrog = false
 
   const tadpoles = tasks.filter((task) => {
     if (removedFrog) return true
 
-    const candidate = comparableTask(task)
-    const isFrog = candidate === chosen || candidate.includes(chosen) || chosen.includes(candidate)
+    const isFrog = tasksAreEquivalent(task, selectedTask)
     if (isFrog) removedFrog = true
     return !isFrog
   })
