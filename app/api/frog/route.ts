@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { parseTasks } from "@/lib/tasks";
 import { getOrCreateAccount } from "@/lib/account";
+import { recordFounderEvents } from "@/lib/founder-analytics";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
@@ -297,6 +298,10 @@ firstStep = parsed.first_step;
   // Guests can try the frog picker without exposing the OpenAI key or
   // creating orphaned database rows. Signing in adds durable memory.
   if (!userId) {
+    await recordFounderEvents([
+      { event_name: "task_dumped" },
+      { event_name: "frog_generated" },
+    ]);
     return Response.json({
       id: null,
       chosen_task: chosenTask,
@@ -343,6 +348,11 @@ firstStep = parsed.first_step;
   ]);
 
   if (eventsError) throw eventsError;
+
+  await recordFounderEvents([
+    { event_name: "task_dumped" },
+    { event_name: "frog_generated" },
+  ]);
 
   return Response.json({
     id: savedFrog.id,

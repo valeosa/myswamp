@@ -3,6 +3,7 @@ import { isFrogEventType } from '@/lib/frog-events'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { getOrCreateAccount } from '@/lib/account'
+import { recordFounderEvents } from '@/lib/founder-analytics'
 
 export async function POST(req: Request) {
   try {
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
     })
 
     if (eventError) throw eventError
+    if (completed) await recordFounderEvents([{ event_name: 'frog_completed' }])
     return Response.json({ ok: true })
   } catch (error) {
     console.error('events route failed', error)

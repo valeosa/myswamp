@@ -24,6 +24,29 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 
+.legal-copy h2 {
+  margin-bottom: 0.5rem;
+  color: #c8d8b8;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.legal-copy a {
+  color: #9fb77b;
+  text-decoration: underline;
+  text-decoration-color: rgba(159, 183, 123, 0.45);
+  text-underline-offset: 3px;
+}
+
+.legal-copy ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.legal-copy li + li {
+  margin-top: 0.35rem;
+}
+
 .swamp-panel {
   position: relative;
   overflow: hidden;

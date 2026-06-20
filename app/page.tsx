@@ -107,6 +107,12 @@ export default function Home() {
   async function settleFrog(eventType: 'frog_completed' | 'frog_not_completed') {
     if (!isSignedIn) {
       if (eventType === 'frog_completed') {
+        fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventName: 'frog_completed' }),
+          keepalive: true,
+        }).catch(() => undefined)
         setTasks('')
         setReliefMessage(true)
         window.setTimeout(() => setReliefMessage(false), 2400)
