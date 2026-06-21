@@ -25,6 +25,8 @@ export default function PreferencesPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return
@@ -76,6 +78,23 @@ export default function PreferencesPage() {
     }
   }
 
+  async function deleteAccount() {
+    setDeleting(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/account', { method: 'DELETE' })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'The swamp could not finish deleting your account.')
+      localStorage.clear()
+      window.location.assign('/')
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'The swamp could not finish deleting your account.')
+      setDeleting(false)
+      setDeleteOpen(false)
+    }
+  }
+
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 text-[#c8d8b8]">
       <div className="mx-auto max-w-xl space-y-6">
@@ -108,7 +127,7 @@ export default function PreferencesPage() {
             <PreferenceToggle
               checked={preferences.deep_swamp_analysis}
               onChange={() => toggle('deep_swamp_analysis')}
-              title="Deep Swamp analysis (Beta)"
+              title="Deeep Swamp analysis (Beta)"
               description="use my frog and tadpole inputs to find personal productivity patterns"
             />
             <PreferenceToggle
@@ -129,9 +148,46 @@ export default function PreferencesPage() {
             >
               {saving ? 'remembering...' : 'save preferences'}
             </button>
+
+            <div className="pt-8">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(true)}
+                className="text-sm text-[#9b7668] opacity-75 transition-opacity hover:opacity-100"
+              >
+                delete account and all data
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {deleteOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-6" role="presentation">
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" className="w-full max-w-sm rounded-2xl border border-[#5c4035] bg-[#0b1710] p-6">
+            <h2 id="delete-account-title" className="text-lg text-[#d8c8b8]">drain your swamp?</h2>
+            <p className="mt-3 text-sm leading-6 text-[#9eaa94]">This permanently deletes your account, frogs, tadpoles, water marks, preferences, and Deep Swamp data. It cannot be undone.</p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(false)}
+                disabled={deleting}
+                className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] disabled:opacity-40"
+              >
+                keep my swamp
+              </button>
+              <button
+                type="button"
+                onClick={deleteAccount}
+                disabled={deleting}
+                className="rounded-xl bg-[#8f6657] px-4 py-3 text-sm text-[#0a1710] disabled:opacity-40"
+              >
+                {deleting ? 'draining...' : 'delete everything'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

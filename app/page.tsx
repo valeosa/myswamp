@@ -26,7 +26,7 @@ export default function Home() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      setTasks(localStorage.getItem('tasks') ?? '')
+      localStorage.removeItem('tasks')
       setHasMemory(localStorage.getItem('hasMemory') === 'true')
       localStorage.removeItem('frog')
       localStorage.removeItem('frogId')
@@ -35,7 +35,6 @@ export default function Home() {
     })
   }, [])
 
-  useEffect(() => { if (hydrated) localStorage.setItem('tasks', tasks) }, [hydrated, tasks])
   useEffect(() => { if (hydrated) localStorage.setItem('hasMemory', String(hasMemory)) }, [hasMemory, hydrated])
 
   useEffect(() => {
@@ -113,6 +112,7 @@ export default function Home() {
 
   async function settleFrog(eventType: 'frog_completed' | 'frog_not_completed') {
     if (!isSignedIn) {
+      setTasks('')
       if (eventType === 'frog_completed') {
         fetch('/api/analytics', {
           method: 'POST',
@@ -120,7 +120,6 @@ export default function Home() {
           body: JSON.stringify({ eventName: 'frog_completed' }),
           keepalive: true,
         }).catch(() => undefined)
-        setTasks('')
         setReliefMessage(true)
         window.setTimeout(() => setReliefMessage(false), 2400)
       }
@@ -148,12 +147,13 @@ export default function Home() {
       if (!response.ok) throw new Error(data.error || 'The swamp could not remember that.')
 
       if (eventType === 'frog_completed') {
-        setTasks('')
         setReliefMessage(true)
         window.setTimeout(() => setReliefMessage(false), 2400)
       } else {
         setPendingCount((current) => current + 1)
       }
+
+      setTasks('')
 
       setHasMemory(true)
 

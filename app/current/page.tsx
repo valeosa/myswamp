@@ -271,7 +271,7 @@ function FrogCard({
     <article className={`mist-reveal rounded-2xl border bg-[#0b1710] p-5 ${current ? 'border-[#47714f]' : 'border-[#294532]/70'}`}>
       <p className="text-lg font-medium text-[#c8d8b8]">{displayFrog}</p>
       {displayFrog !== frog.frog && (
-        <details className="start-details mt-3 text-sm text-[#b7c9aa]">
+        <details className="lily-details mt-3 text-sm text-[#b7c9aa]">
           <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718b75] hover:text-[#9caf9b]"><LilyIcon />start here</summary>
           <p className="mt-2 pl-4">{frog.frog}</p>
         </details>

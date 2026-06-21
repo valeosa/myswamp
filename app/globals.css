@@ -67,13 +67,14 @@ summary {
   filter: brightness(1.06);
 }
 
-.start-details .lily-toggle {
+.lily-details .lily-toggle {
+  display: inline-block;
   transform-origin: center;
   transition: transform 180ms ease;
 }
 
-.start-details[open] .lily-toggle {
-  transform: rotate(180deg);
+.lily-details[open] .lily-toggle {
+  transform: scaleX(-1);
 }
 
 @keyframes surface-from-mist {

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getTadpoleItems, parseTasks, tasksAreEquivalent } from "@/lib/tasks";
+import { getTadpoleItems, parseTasks, taskKey, tasksAreEquivalent } from "@/lib/tasks";
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
 
@@ -15,6 +15,41 @@ type DeepSwampContext = {
   timezone: string;
   localHour: number;
   localWeekday: number;
+};
+
+type FrogChoice = { chosen_task: string; first_step: string };
+
+const vaguePattern = /^(get my life|be more productive|sort myself|adult better|become happy|be better|be happier)\b/i;
+const genericStepPattern = /^(?:pick up|unlock) your phone\b|^open your (?:phone|laptop|computer)\b|^open your notes app\b/i;
+const bannedStepWords = /\b(?:choose|pick|decide|prepare|start|work on|organize|handle|finish)\b/i;
+
+function normalizeChoice(choice: FrogChoice, taskLines: string[]) {
+  const chosenTask = taskLines.find((task) => tasksAreEquivalent(task, choice.chosen_task)) ?? taskLines[0];
+  const firstStep = typeof choice.first_step === "string" ? choice.first_step.trim() : "";
+  const validStep = Boolean(firstStep)
+    && firstStep.length <= 180
+    && !genericStepPattern.test(firstStep)
+    && !bannedStepWords.test(firstStep)
+    && !/\band\b/i.test(firstStep);
+
+  return { chosenTask, firstStep, validStep };
+}
+
+const frogChoiceSchema = {
+  type: "json_schema" as const,
+  json_schema: {
+    name: "frog_choice",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: {
+        chosen_task: { type: "string" },
+        first_step: { type: "string" },
+      },
+      required: ["chosen_task", "first_step"],
+      additionalProperties: false,
+    },
+  },
 };
 
 function parseDeepSwampContext(value: unknown): DeepSwampContext | null {
@@ -118,6 +153,10 @@ async function chooseFrog(req: Request) {
 
   const taskLines = parseTasks(tasks);
 
+  if (taskLines.length === 0) {
+    return Response.json({ error: "Add at least one task first." }, { status: 400 });
+  }
+
   if (taskLines.length > MAX_TASKS) {
     return Response.json(
       { error: `Keep this swamp to ${MAX_TASKS} tasks or fewer.` },
@@ -125,9 +164,49 @@ async function chooseFrog(req: Request) {
     );
   }
 
+  const submittedKeys = taskLines.map(taskKey).filter(Boolean);
+  if (new Set(submittedKeys).size !== submittedKeys.length) {
+    return Response.json(
+      { error: "That task is already in this water. Keep one copy and try again." },
+      { status: 409 },
+    );
+  }
+
+  const account = userId ? await getOrCreateAccount(userId) : null;
+  const supabase = userId ? getSupabaseAdmin() : null;
+  if (account && supabase) {
+    const [unresolvedFrogs, activeTadpoles] = await Promise.all([
+      supabase
+        .from("frogs")
+        .select("chosen_task, frog")
+        .eq("account_id", account.id)
+        .in("status", ["active", "not_completed"]),
+      supabase
+        .from("tadpoles")
+        .select("task_key")
+        .eq("account_id", account.id)
+        .eq("status", "active"),
+    ]);
+
+    if (unresolvedFrogs.error) throw unresolvedFrogs.error;
+    if (activeTadpoles.error) throw activeTadpoles.error;
+
+    const unresolvedKeys = new Set<string>();
+    for (const frog of unresolvedFrogs.data ?? []) {
+      unresolvedKeys.add(taskKey(frog.chosen_task || frog.frog));
+    }
+    for (const tadpole of activeTadpoles.data ?? []) unresolvedKeys.add(tadpole.task_key);
+
+    if (submittedKeys.some((key) => unresolvedKeys.has(key))) {
+      return Response.json(
+        { error: "That task is already in the swamp. Clear or finish it before adding it again." },
+        { status: 409 },
+      );
+    }
+  }
+
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const vaguePattern = /^(get my life|be more productive|sort myself|adult better|become happy|be better|be happier)/i;
 const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
   vaguePattern.test(t.trim())
 );
@@ -246,6 +325,10 @@ OUTPUT RULES (STRICT):
 - Do not say "prepare", "start", "work on", "organize", "handle", or "finish".
 - Make it smaller than feels reasonable.
 - Prefer the first physical object/action involved.
+- The action must be recognisably specific to the chosen task.
+- Name the obvious app, service, document, screen, person, tool, or object.
+- Skip generic gateway actions. Never say "pick up your phone", "unlock your phone", "open your laptop", or "open your notes app" unless the task itself is about notes or a brain dump.
+- For ordering food, open a delivery app. For creating a social account, open that platform's create-account screen. For a creative ambition, make the smallest concrete artefact or learning move that advances it.
 
 HARD RULE: The frog MUST NOT contain the words "choose", "pick", 
 "decide", or "one specific". 
@@ -297,11 +380,12 @@ Good: pick up one item from the floor
 Now choose the frog for this task dump:
 
 ${tasksToSend}
-`;;
+`;
 
   const completion = await client.chat.completions.create({
     model: "gpt-4.1",
     temperature: 0.2,
+    response_format: frogChoiceSchema,
     messages: [
       {
         role: "system",
@@ -314,21 +398,32 @@ ${tasksToSend}
     ],
   });
 
-  const output = completion.choices[0].message.content?.trim();
+  const output = completion.choices[0].message.content?.trim() ?? "";
+  let parsed = JSON.parse(output) as FrogChoice;
+  let normalized = normalizeChoice(parsed, taskLines);
 
-let parsed;
+  if (!normalized.validStep) {
+    const repair = await client.chat.completions.create({
+      model: "gpt-4.1",
+      temperature: 0,
+      response_format: frogChoiceSchema,
+      messages: [
+        {
+          role: "system",
+          content: `Return JSON for one task-specific physical action under two minutes. The action must directly advance the task. Name the relevant app, screen, document, person, tool, or object. Never use a generic gateway such as picking up or unlocking a phone, opening a laptop, or opening Notes. Do not use "and" or the words choose, pick, decide, prepare, start, work on, organize, handle, or finish.`,
+        },
+        {
+          role: "user",
+          content: `Chosen task: ${normalized.chosenTask}\nRejected generic step: ${parsed.first_step}\nReplace it with a specific first step. Keep chosen_task exactly as supplied.`,
+        },
+      ],
+    });
+    parsed = JSON.parse(repair.choices[0].message.content ?? "") as FrogChoice;
+    normalized = normalizeChoice({ ...parsed, chosen_task: normalized.chosenTask }, taskLines);
+  }
 
-try {
-  parsed = JSON.parse(output || "");
-} catch {
-  parsed = {
-    chosen_task: taskLines[0] || "your task",
-    first_step: output || "touch the first object involved",
-  };
-}
-
-chosenTask = parsed.chosen_task;
-firstStep = parsed.first_step;
+  chosenTask = normalized.chosenTask;
+  firstStep = normalized.validStep ? normalized.firstStep : `open the ${normalized.chosenTask} task where you will do it`;
 }
 
   // Guests can try the frog picker without exposing the OpenAI key or
@@ -347,9 +442,8 @@ firstStep = parsed.first_step;
     });
   }
 
-  const account = await getOrCreateAccount(userId);
+  if (!account || !supabase) throw new Error("The signed-in account could not be loaded");
   const deepSwampContext = account.deep_swamp_analysis ? requestedContext : null;
-  const supabase = getSupabaseAdmin();
   const { data: savedFrog, error: frogError } = await supabase
     .from("frogs")
     .insert({

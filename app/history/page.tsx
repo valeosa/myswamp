@@ -215,14 +215,14 @@ export default function HistoryPage() {
               </div>
 
               {displayFrog !== item.frog && (
-                <details className="text-sm text-[#b7c9aa]">
+                <details className="lily-details text-sm text-[#b7c9aa]">
                   <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />your one small action</summary>
                   <p className="mt-2 pl-4">{item.frog}</p>
                 </details>
               )}
 
               {tadpoles.length > 0 && (
-                <details className="text-sm text-[#aab5a2]">
+                <details className="lily-details text-sm text-[#aab5a2]">
                   <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />tadpoles</summary>
                   <ul className="mt-2 pl-4 space-y-1">
                     {tadpoles.map((tadpole, index) => <li key={`${tadpole}-${index}`}>{tadpole}</li>)}
@@ -353,7 +353,7 @@ export default function HistoryPage() {
 
 function LilyIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 14" className="h-3 w-4 fill-current opacity-80">
+    <svg aria-hidden="true" viewBox="0 0 20 14" className="lily-toggle h-3 w-4 fill-current opacity-80">
       <path d="M1 8.5C3.8 2.5 10.8.4 17 3.4c-1.2 1.1-2.3 2-3.4 2.8L19 8.8C14 13.2 5.8 13.4 1 8.5Z" />
     </svg>
   )

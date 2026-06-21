@@ -4,7 +4,7 @@ const privacyEmail = process.env.NEXT_PUBLIC_PRIVACY_EMAIL
 
 export default function PrivacyPage() {
   return (
-    <LegalShell title="privacy policy" updated="20 June 2026">
+    <LegalShell title="privacy policy" updated="21 June 2026">
       <section>
         <h2>the short version</h2>
         <p>mySwamp uses the information you provide to choose a next action, remember your frogs when you sign in, understand whether the product is useful, and contact you only where you have asked us to. Task dumps are not sold.</p>
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
 
       <section>
         <h2>retention and deletion</h2>
-        <p>Account-linked frogs and task history are kept while your account is active so the swamp can remember. Hiding a frog removes it from your visible history but does not immediately erase the underlying record. Operational and analytics records are kept only while reasonably needed to run, secure, and evaluate this early product. You can request account data deletion using the contact method above.</p>
+        <p>Account-linked frogs and task history are kept while your account is active so the swamp can remember. Hiding a frog removes it from your visible history but does not immediately erase the underlying record. You can permanently delete your account and all account-linked frogs, tadpoles, events, water marks, preferences, and Deep Swamp data from preferences. Aggregate first-party analytics contain no account identifier or task text and cannot be linked back to the deleted account.</p>
       </section>
 
       <section>
