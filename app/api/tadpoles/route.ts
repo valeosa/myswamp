@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { getOrCreateAccount } from '@/lib/account'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { parseLocalContext } from '@/lib/local-context'
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -29,26 +30,32 @@ export async function PATCH(request: Request) {
 
     const account = await getOrCreateAccount(userId)
     const supabase = getSupabaseAdmin()
-    const clearedAt = new Date().toISOString()
-    let update = supabase
-      .from('tadpoles')
-      .update({
-        status: 'cleared',
-        cleared_at: clearedAt,
-        clear_method: clearAll ? 'clear_all' : 'individual',
-      })
-      .eq('account_id', account.id)
-      .eq('status', 'active')
-
-    if (!clearAll) update = update.eq('id', tadpoleId)
-
-    const { data, error } = await update.select('id')
+    const { data, error } = await supabase.rpc('clear_tadpoles', {
+      p_account_id: account.id,
+      p_user_id: userId,
+      p_tadpole_id: clearAll ? null : tadpoleId,
+      p_clear_all: clearAll,
+      p_context: parseLocalContext(body?.context),
+    })
     if (error) throw error
     if (!clearAll && data.length === 0) {
+      const { data: existing } = await supabase
+        .from('tadpoles')
+        .select('id, status')
+        .eq('id', tadpoleId)
+        .eq('account_id', account.id)
+        .maybeSingle()
+
+      if (existing?.status === 'cleared') {
+        return Response.json({ clearedIds: [], changed: false })
+      }
       return Response.json({ error: 'Tadpole not found' }, { status: 404 })
     }
 
-    return Response.json({ clearedIds: data.map((tadpole) => tadpole.id) })
+    return Response.json({
+      clearedIds: data.map((tadpole: { id: string }) => tadpole.id),
+      changed: data.length > 0,
+    })
   } catch (error) {
     console.error('tadpole clear failed', error)
     return Response.json(

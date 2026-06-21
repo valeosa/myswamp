@@ -13,7 +13,7 @@ export async function GET() {
     const account = await getOrCreateAccount(userId)
     const visibleHistory = await supabase
       .from('frogs')
-      .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
+      .select('id, task_dump, frog, chosen_task, chosen_task_position, status, created_at, completed_at')
       .eq('account_id', account.id)
       .eq('status', 'completed')
       .is('hidden_at', null)
@@ -25,7 +25,7 @@ export async function GET() {
     if (visibleHistory.error?.message.includes('hidden_at')) {
       const fallbackHistory = await supabase
         .from('frogs')
-        .select('id, task_dump, frog, chosen_task, status, created_at, completed_at')
+        .select('id, task_dump, frog, chosen_task, chosen_task_position, status, created_at, completed_at')
         .eq('account_id', account.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false })

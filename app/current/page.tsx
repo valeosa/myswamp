@@ -6,12 +6,14 @@ import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog } from '@/lib/tasks'
 import { LilyIcon } from '@/app/lily-icon'
+import { getLocalContext } from '@/lib/local-context'
 
 type CurrentFrog = {
   id: string
   task_dump: string
   frog: string
   chosen_task: string | null
+  chosen_task_position: number | null
   status: 'active' | 'not_completed'
   created_at: string
 }
@@ -66,7 +68,7 @@ export default function CurrentPage() {
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frogId, eventType: 'frog_completed' }),
+        body: JSON.stringify({ frogId, eventType: 'frog_completed', context: getLocalContext() }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'The swamp could not clear that frog.')
@@ -89,7 +91,7 @@ export default function CurrentPage() {
       const response = await fetch('/api/tadpoles', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tadpoleId }),
+        body: JSON.stringify({ tadpoleId, context: getLocalContext() }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'The tadpole would not clear.')
@@ -112,7 +114,7 @@ export default function CurrentPage() {
       const response = await fetch('/api/tadpoles', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clearAll: true }),
+        body: JSON.stringify({ clearAll: true, context: getLocalContext() }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'The tadpoles would not clear.')

@@ -6,16 +6,13 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getTadpoleItems, parseTasks, taskKey, tasksAreEquivalent } from "@/lib/tasks";
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
+import { parseLocalContext } from "@/lib/local-context";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
 const DEEP_SWAMP_CAPTURE_VERSION = "assignment-context-v1";
-
-type DeepSwampContext = {
-  timezone: string;
-  localHour: number;
-  localWeekday: number;
-};
+const FROG_MODEL = "gpt-4.1";
+const FROG_PROMPT_VERSION = "frog-picker-v2";
 
 type FrogChoice = { chosen_task: string; first_step: string };
 
@@ -24,7 +21,10 @@ const genericStepPattern = /^(?:pick up|unlock) your phone\b|^open your (?:phone
 const bannedStepWords = /\b(?:choose|pick|decide|prepare|start|work on|organize|handle|finish)\b/i;
 
 function normalizeChoice(choice: FrogChoice, taskLines: string[]) {
-  const chosenTask = taskLines.find((task) => tasksAreEquivalent(task, choice.chosen_task)) ?? taskLines[0];
+  const exactTask = taskLines.find((task) => taskKey(task) === taskKey(choice.chosen_task));
+  const chosenTask = exactTask
+    ?? taskLines.find((task) => tasksAreEquivalent(task, choice.chosen_task))
+    ?? taskLines[0];
   const firstStep = typeof choice.first_step === "string" ? choice.first_step.trim() : "";
   const validStep = Boolean(firstStep)
     && firstStep.length <= 180
@@ -52,33 +52,6 @@ const frogChoiceSchema = {
   },
 };
 
-function parseDeepSwampContext(value: unknown): DeepSwampContext | null {
-  if (!value || typeof value !== "object") return null;
-
-  const { timezone, localHour, localWeekday } = value as Record<string, unknown>;
-  const timezoneIsValid = typeof timezone === "string"
-    && timezone.length <= 64
-    && (timezone === "UTC" || /^[A-Za-z_]+(?:\/[A-Za-z0-9_+.-]+)+$/.test(timezone));
-
-  if (
-    !timezoneIsValid
-    || !Number.isInteger(localHour)
-    || !Number.isInteger(localWeekday)
-    || (localHour as number) < 0
-    || (localHour as number) > 23
-    || (localWeekday as number) < 0
-    || (localWeekday as number) > 6
-  ) {
-    return null;
-  }
-
-  return {
-    timezone,
-    localHour: localHour as number,
-    localWeekday: localWeekday as number,
-  };
-}
-
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -89,7 +62,7 @@ export async function GET() {
     const [activeFrog, pendingFrogs, rememberedFrogs] = await Promise.all([
       supabase
         .from("frogs")
-        .select("id, task_dump, frog, chosen_task, created_at")
+        .select("id, task_dump, frog, chosen_task, chosen_task_position, created_at")
         .eq("account_id", account.id)
         .eq("status", "active")
         .order("created_at", { ascending: false })
@@ -138,7 +111,7 @@ async function chooseFrog(req: Request) {
 
   const body = await req.json();
   const tasks = body?.tasks;
-  const requestedContext = parseDeepSwampContext(body?.context);
+  const requestedContext = parseLocalContext(body?.context);
 
   if (typeof tasks !== "string" || tasks.trim() === "") {
     return Response.json({ error: "Add at least one task first." }, { status: 400 });
@@ -213,6 +186,12 @@ const isVague = taskLines.length > 0 && taskLines.every((t: string) =>
 
 let chosenTask = "";
 let firstStep = "";
+let generationSource: "openai" | "deterministic" = "deterministic";
+let generationPromptVersion = "vague-fallback-v1";
+let generationModel: string | null = null;
+let generationSystemFingerprint: string | null = null;
+let generationResponseId: string | null = null;
+let generationRepaired = false;
 
 if (isVague) {
   chosenTask = taskLines[0]?.trim() || "your task";
@@ -383,7 +362,7 @@ ${tasksToSend}
 `;
 
   const completion = await client.chat.completions.create({
-    model: "gpt-4.1",
+    model: FROG_MODEL,
     temperature: 0.2,
     response_format: frogChoiceSchema,
     messages: [
@@ -399,12 +378,17 @@ ${tasksToSend}
   });
 
   const output = completion.choices[0].message.content?.trim() ?? "";
+  generationSource = "openai";
+  generationPromptVersion = FROG_PROMPT_VERSION;
+  generationModel = completion.model;
+  generationSystemFingerprint = completion.system_fingerprint ?? null;
+  generationResponseId = completion.id;
   let parsed = JSON.parse(output) as FrogChoice;
   let normalized = normalizeChoice(parsed, taskLines);
 
   if (!normalized.validStep) {
     const repair = await client.chat.completions.create({
-      model: "gpt-4.1",
+      model: FROG_MODEL,
       temperature: 0,
       response_format: frogChoiceSchema,
       messages: [
@@ -419,6 +403,10 @@ ${tasksToSend}
       ],
     });
     parsed = JSON.parse(repair.choices[0].message.content ?? "") as FrogChoice;
+    generationRepaired = true;
+    generationModel = repair.model;
+    generationSystemFingerprint = repair.system_fingerprint ?? null;
+    generationResponseId = repair.id;
     normalized = normalizeChoice({ ...parsed, chosen_task: normalized.chosenTask }, taskLines);
   }
 
@@ -443,86 +431,55 @@ ${tasksToSend}
   }
 
   if (!account || !supabase) throw new Error("The signed-in account could not be loaded");
-  const deepSwampContext = account.deep_swamp_analysis ? requestedContext : null;
-  const { data: savedFrog, error: frogError } = await supabase
-    .from("frogs")
-    .insert({
-      user_id: userId,
-      account_id: account.id,
-      task_dump: tasks.trim(),
-      frog: firstStep,
-      chosen_task: chosenTask,
-      status: "active",
-      ...(deepSwampContext
-        ? {
-            local_timezone: deepSwampContext.timezone,
-            local_hour: deepSwampContext.localHour,
-            local_weekday: deepSwampContext.localWeekday,
-            task_count: taskLines.length,
-            deep_swamp_capture_version: DEEP_SWAMP_CAPTURE_VERSION,
-          }
-        : {}),
-    })
-    .select("id, created_at")
-    .single();
-
-  if (frogError) throw frogError;
-
-  const { error: eventsError } = await supabase.from("frog_events").insert([
+  const chosenTaskPosition = Math.max(
+    0,
+    taskLines.findIndex((task) => taskKey(task) === taskKey(chosenTask)),
+  );
+  const tadpoleItems = getTadpoleItems(tasks, chosenTask, firstStep, chosenTaskPosition);
+  const { data: savedRows, error: assignmentError } = await supabase.rpc(
+    "create_frog_assignment",
     {
-      user_id: userId,
-      account_id: account.id,
-      frog_id: savedFrog.id,
-      event_type: "swamp_dumped",
-      raw_tasks: tasks.trim(),
-    },
-    {
-      user_id: userId,
-      account_id: account.id,
-      frog_id: savedFrog.id,
-      event_type: "frog_assigned",
-      raw_tasks: tasks.trim(),
-      frog_text: firstStep,
-      action_text: firstStep,
-    },
-  ]);
-
-  if (eventsError) throw eventsError;
-
-  const tadpoleItems = getTadpoleItems(tasks, chosenTask, firstStep);
-  if (tadpoleItems.length > 0) {
-    const { error: tadpolesError } = await supabase
-      .from("tadpoles")
-      .upsert(
-        tadpoleItems.map((item) => ({
-          user_id: userId,
-          account_id: account.id,
-          source_frog_id: savedFrog.id,
+      p_payload: {
+        user_id: userId,
+        account_id: account.id,
+        task_dump: tasks.trim(),
+        task_count: taskLines.length,
+        frog: firstStep,
+        chosen_task: chosenTask,
+        chosen_task_position: chosenTaskPosition,
+        capture_version: DEEP_SWAMP_CAPTURE_VERSION,
+        context: requestedContext
+          ? {
+              timezone: requestedContext.timezone,
+              local_hour: requestedContext.localHour,
+              local_weekday: requestedContext.localWeekday,
+            }
+          : null,
+        generation: {
+          source: generationSource,
+          prompt_version: generationPromptVersion,
+          model: generationModel,
+          system_fingerprint: generationSystemFingerprint,
+          response_id: generationResponseId,
+          repaired: generationRepaired,
+        },
+        tadpoles: tadpoleItems.map((item) => ({
           position: item.position,
           task_text: item.taskText,
           task_key: item.taskKey,
-          created_at: savedFrog.created_at,
         })),
-        { ignoreDuplicates: true },
-      );
+        deep_items: taskLines.map((taskText, position) => ({
+          position,
+          task_text: taskText,
+          is_selected: position === chosenTaskPosition,
+        })),
+      },
+    },
+  );
 
-    if (tadpolesError) throw tadpolesError;
-  }
-
-  if (deepSwampContext) {
-    const { error: taskItemsError } = await supabase
-      .from("deep_swamp_task_items")
-      .insert(taskLines.map((taskText, position) => ({
-        frog_id: savedFrog.id,
-        account_id: account.id,
-        position,
-        task_text: taskText,
-        is_selected: tasksAreEquivalent(taskText, chosenTask),
-      })));
-
-    // Deep Swamp collection must never block the core frog experience.
-    if (taskItemsError) console.warn("Deep Swamp assignment snapshot skipped", taskItemsError);
-  }
+  if (assignmentError) throw assignmentError;
+  const savedFrog = savedRows?.[0];
+  if (!savedFrog?.id) throw new Error("The frog assignment was not returned");
 
   await recordFounderEvents([
     { event_name: "task_dumped" },

@@ -4,15 +4,19 @@ Deep Swamp is the future personalised pattern layer for mySwamp. Its purpose is 
 
 ## Current foundation
 
-- Signed-in frog assignments store the raw dump, selected source task, generated first action, assignment time, completion time, and immutable `done` / `not yet` events.
-- Tadpoles persist independently of frog status. Individual and bulk clears create immutable events with their source frog and elapsed time; bulk clears remain distinguishable so they are not treated as separate deliberate completions.
+- Signed-in frog assignments store the raw dump, exact selected task position, generated first action, assignment time, completion time, and versioned `done` / `not yet` events.
+- Assignment writes are transactional: the frog, assignment events, and tadpoles settle together. Outcome writes are idempotent, so a retry cannot impersonate a second behavioural choice.
+- Tadpoles persist independently of frog status. Individual and bulk clears create immutable, versioned events with their source frog and elapsed time; bulk clears remain distinguishable so they are not treated as separate deliberate completions.
 - People can explicitly opt into Deep Swamp analysis in preferences.
-- Opted-in assignments store each frog and tadpole as a separate task-item snapshot, plus local timezone, hour, weekday, and task count.
-- Opting out stops future Deep Swamp capture and deletes the extra task-item and local-time context. Ordinary frog history remains.
+- Opted-in assignments store each frog and tadpole as a separate task-item snapshot, plus local timezone, hour, weekday, and task count. Local context is also captured at frog outcomes and tadpole clears so elapsed-time analysis does not assume the context remained unchanged.
+- Frog generation provenance records the picker source, prompt version, model response identifiers, and whether a repair pass was needed. A capture-status field distinguishes complete, failed, and non-consented records.
+- Opting out transactionally stops future Deep Swamp capture and deletes the extra task-item and local-time context. Ordinary frog history remains.
 - Category, deadline, obligation, and confidence columns exist but are intentionally empty until a versioned classifier is implemented and evaluated.
-- Signed-in users can “mark the water” with season, life context, energy, moment, and an optional human-readable era name. A mark begins an era and remains the applicable context until the next mark; it is never attached to one specific frog.
+- Signed-in users can “mark the water” with season, life context, energy, moment, and an optional human-readable era name. Every mark carries a context-schema version. A mark begins an era and remains the applicable context until the next mark; it is never attached to one specific frog.
 
-## Next collection work
+Older records can legitimately have missing position, provenance, or local context. Treat those values as unknown; never backfill them with guesses.
+
+## Pre-analysis work (later)
 
 - [ ] Implement and test a versioned task classifier.
 - [ ] Label task category: admin, creative, domestic, financial, health, school, social, work, or other.

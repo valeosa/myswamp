@@ -5,6 +5,7 @@ import { useAuth, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { parseTasks } from '@/lib/tasks'
 import { SwampScenery } from '@/app/swamp-scenery'
+import { getLocalContext } from '@/lib/local-context'
 
 const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
@@ -90,11 +91,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tasks,
-          context: {
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            localHour: new Date().getHours(),
-            localWeekday: new Date().getDay(),
-          },
+          context: getLocalContext(),
         }),
       })
       const data = await response.json()
@@ -142,7 +139,7 @@ export default function Home() {
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frogId, eventType }),
+        body: JSON.stringify({ frogId, eventType, context: getLocalContext() }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'The swamp could not remember that.')

@@ -19,6 +19,7 @@ type Frog = {
   task_dump: string
   frog: string
   chosen_task: string | null
+  chosen_task_position: number | null
   status: 'active' | 'completed' | 'not_completed'
   created_at: string
   completed_at: string | null
@@ -218,7 +219,7 @@ export default function HistoryPage() {
         )}
 
         {frogs.map((item) => {
-          const tadpoles = getTadpoles(item.task_dump, item.chosen_task, item.frog)
+          const tadpoles = getTadpoles(item.task_dump, item.chosen_task, item.frog, item.chosen_task_position)
           const displayFrog = getDisplayFrog(item.task_dump, item.chosen_task, item.frog)
 
           return (

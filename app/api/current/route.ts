@@ -12,7 +12,7 @@ export async function GET() {
     const supabase = getSupabaseAdmin()
     const { data, error } = await supabase
       .from('frogs')
-      .select('id, task_dump, frog, chosen_task, status, created_at')
+      .select('id, task_dump, frog, chosen_task, chosen_task_position, status, created_at')
       .eq('account_id', account.id)
       .in('status', ['active', 'not_completed'])
       .order('created_at', { ascending: false })
@@ -22,7 +22,7 @@ export async function GET() {
 
     const frogs = data ?? []
     const legacyTadpoles = frogs.flatMap((frog) =>
-      getTadpoleItems(frog.task_dump, frog.chosen_task, frog.frog).map((item) => ({
+      getTadpoleItems(frog.task_dump, frog.chosen_task, frog.frog, frog.chosen_task_position).map((item) => ({
         user_id: userId,
         account_id: account.id,
         source_frog_id: frog.id,

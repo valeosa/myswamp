@@ -27,14 +27,30 @@ export function getDisplayFrog(taskDump: string, chosenTask: string | null, frog
   return tasks.length === 1 ? tasks[0] : frogText
 }
 
-export function getTadpoles(taskDump: string, chosenTask: string | null, frogText?: string) {
-  return getTadpoleItems(taskDump, chosenTask, frogText).map((item) => item.taskText)
+export function getTadpoles(
+  taskDump: string,
+  chosenTask: string | null,
+  frogText?: string,
+  chosenPosition?: number | null,
+) {
+  return getTadpoleItems(taskDump, chosenTask, frogText, chosenPosition).map((item) => item.taskText)
 }
 
-export function getTadpoleItems(taskDump: string, chosenTask: string | null, frogText?: string) {
+export function getTadpoleItems(
+  taskDump: string,
+  chosenTask: string | null,
+  frogText?: string,
+  chosenPosition?: number | null,
+) {
   const tasks = parseTasks(taskDump)
   const selectedTask = chosenTask || frogText
   if (!selectedTask) return []
+
+  if (typeof chosenPosition === 'number' && chosenPosition >= 0 && chosenPosition < tasks.length) {
+    return tasks.flatMap((task, position) => position === chosenPosition
+      ? []
+      : [{ position, taskText: task, taskKey: taskKey(task) || task.toLocaleLowerCase() }])
+  }
 
   let removedFrog = false
 

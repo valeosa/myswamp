@@ -71,6 +71,7 @@ export async function POST(request: Request) {
         energy: selection.energy,
         moment: selection.moment,
         era_name: eraName || null,
+        context_version: 'water-context-v1',
       })
       .select('id, era_name, season, life_context, energy, moment, created_at')
       .single()
