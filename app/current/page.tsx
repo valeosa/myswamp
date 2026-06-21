@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog } from '@/lib/tasks'
+import { LilyIcon } from '@/app/lily-icon'
 
 type CurrentFrog = {
   id: string
@@ -130,8 +131,8 @@ export default function CurrentPage() {
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 text-[#c8d8b8]">
       <div className="mx-auto max-w-2xl space-y-7">
-        <Link href="/" className="inline-block text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
-          ← back
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
+          <LilyIcon /> back
         </Link>
 
         <div className="flex items-end justify-between gap-4">
@@ -287,13 +288,5 @@ function FrogCard({
         </button>
       )}
     </article>
-  )
-}
-
-function LilyIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 20 14" className="lily-toggle h-3 w-4 fill-current opacity-80">
-      <path d="M1 8.5C3.8 2.5 10.8.4 17 3.4c-1.2 1.1-2.3 2-3.4 2.8L19 8.8C14 13.2 5.8 13.4 1 8.5Z" />
-    </svg>
   )
 }

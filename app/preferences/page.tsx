@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
+import { LilyIcon } from '@/app/lily-icon'
 
 type Preferences = {
   email_updates: boolean
@@ -103,8 +104,8 @@ export default function PreferencesPage() {
           <p className="mt-1 text-sm text-[#718067]">you choose what travels beyond the swamp.</p>
         </div>
 
-        <Link href="/" className="inline-block text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
-          ← back to swamp
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
+          <LilyIcon /> back to swamp
         </Link>
 
         {!isSignedIn && isLoaded && <p className="text-[#8fa66c]">sign in to change your preferences.</p>}

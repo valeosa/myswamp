@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
+import { LilyIcon } from '@/app/lily-icon'
 
 type Metric = { total: number; last7Days: number }
 type AnalyticsData = {
@@ -54,7 +55,7 @@ export default function FounderPage() {
   return (
     <main className="min-h-screen bg-[#07100b] px-6 pb-20 pt-24 text-[#c8d8b8]">
       <div className="mx-auto max-w-4xl">
-        <Link href="/" className="text-sm text-[#8fa66c] opacity-75 hover:opacity-100">← back to swamp</Link>
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#8fa66c] opacity-75 hover:opacity-100"><LilyIcon /> back to swamp</Link>
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">founder clearing</h1>

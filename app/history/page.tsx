@@ -5,6 +5,7 @@ import { useAuth, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
+import { LilyIcon } from '@/app/lily-icon'
 import {
   isMemoryContextSelection,
   MAX_ERA_NAME_LENGTH,
@@ -170,8 +171,8 @@ export default function HistoryPage() {
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 font-sans text-[#c8d8b8]">
       <div className="max-w-2xl mx-auto space-y-6">
-        <Link href="/" className="inline-block text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
-          {!isSignedIn || (!loading && frogs.length === 0) ? '← back' : '← back to swamp'}
+        <Link href="/" className="inline-flex items-center gap-2 text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
+          <LilyIcon /> {!isSignedIn || (!loading && frogs.length === 0) ? 'back' : 'back to swamp'}
         </Link>
 
         <div className="flex items-end justify-between gap-4">
@@ -330,7 +331,7 @@ export default function HistoryPage() {
                   value={eraName}
                   onChange={(event) => setEraName(event.target.value)}
                   maxLength={MAX_ERA_NAME_LENGTH}
-                  placeholder="starting a new chapter"
+                  placeholder="what’s happening beneath the surface?"
                   className="mt-3 w-full border-0 border-b border-[#30442f] bg-transparent px-0 py-2 text-[#c8d8b8] outline-none placeholder:text-[#516052] focus:border-[#8fa66c]"
                 />
               </div>
@@ -350,9 +351,9 @@ export default function HistoryPage() {
                           role="radio"
                           aria-checked={selected}
                           onClick={() => setWaterContext((current) => ({ ...current, [section.key]: option }))}
-                          className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                          className={`water-choice rounded-full border px-3.5 py-2 text-sm transition-all ${
                             selected
-                              ? 'border-[#8fa66c] bg-[#8fa66c] text-[#0a1710]'
+                              ? 'water-choice-selected border-[#82a474] bg-[#243a28] text-[#d5dfca] shadow-[0_0_20px_rgba(132,169,117,0.16)]'
                               : 'border-[#30442f] bg-[#0d1b12] text-[#9eaa94] hover:border-[#526b49] hover:text-[#c8d8b8]'
                           }`}
                         >
@@ -380,13 +381,5 @@ export default function HistoryPage() {
         document.body,
       )}
     </main>
-  )
-}
-
-function LilyIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 20 14" className="lily-toggle h-3 w-4 fill-current opacity-80">
-      <path d="M1 8.5C3.8 2.5 10.8.4 17 3.4c-1.2 1.1-2.3 2-3.4 2.8L19 8.8C14 13.2 5.8 13.4 1 8.5Z" />
-    </svg>
   )
 }
