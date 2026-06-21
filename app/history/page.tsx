@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
 import { LilyIcon } from '@/app/lily-icon'
+import { SwampScenery } from '@/app/swamp-scenery'
 import {
   isMemoryContextSelection,
   MAX_ERA_NAME_LENGTH,
@@ -302,43 +303,38 @@ export default function HistoryPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="mark-water-title"
-            className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-3xl border border-[#3f5437] bg-[#09140d] p-5 shadow-2xl shadow-black/40 sm:p-7"
+            className="relative max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-y-auto rounded-[1.4rem_1.8rem_1.25rem_1.65rem] border border-[#29422f] bg-[#09140d] shadow-[0_18px_60px_rgba(0,0,0,0.42)]"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id="mark-water-title" className="text-xl font-medium text-[#c8d8b8]">mark the water</h2>
-                <p className="mt-1 text-sm italic text-[#718b75]">what is life moving through right now?</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMarkPanelOpen(false)}
-                disabled={savingMark}
-                aria-label="Close"
-                className="rounded-full px-2 py-1 text-lg text-[#718067] transition-colors hover:text-[#c8d8b8] disabled:opacity-40"
-              >
-                ×
-              </button>
-            </div>
+            <SwampScenery variant="memory" />
 
-            <div className="mt-7 space-y-6">
-              <div>
-                <label htmlFor="era-name" className="text-xs uppercase tracking-[0.2em] text-[#718067]">
-                  name this era <span className="normal-case tracking-normal opacity-70">(optional)</span>
-                </label>
+            <div className="relative z-10 p-5 sm:p-7">
+              <div className="flex flex-wrap items-center gap-3 pr-10 sm:gap-5">
+                <h2 id="mark-water-title" className="shrink-0 text-xl font-medium text-[#c8d8b8]">mark the water</h2>
                 <input
                   id="era-name"
                   type="text"
                   value={eraName}
                   onChange={(event) => setEraName(event.target.value)}
                   maxLength={MAX_ERA_NAME_LENGTH}
-                  placeholder="what’s happening beneath the surface?"
-                  className="mt-3 w-full border-0 border-b border-[#30442f] bg-transparent px-0 py-2 text-[#c8d8b8] outline-none placeholder:text-[#516052] focus:border-[#8fa66c]"
+                  aria-label="Optionally name this era"
+                  placeholder="what’s happening beneath the surface? optionally name this era."
+                  className="min-w-0 flex-1 basis-72 rounded-xl border border-[#263e2d] bg-[#0b1710]/90 px-3.5 py-2 text-sm text-[#c8d8b8] outline-none placeholder:text-[#5f7061] focus:border-[#38563d]"
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => setMarkPanelOpen(false)}
+                disabled={savingMark}
+                aria-label="Close"
+                className="absolute right-4 top-4 rounded-full px-2 py-1 text-lg text-[#718067] transition-colors hover:text-[#c8d8b8] disabled:opacity-40 sm:right-6 sm:top-6"
+              >
+                ×
+              </button>
 
+              <div className="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {memorySections.map((section) => (
                 <section key={section.key} aria-labelledby={`water-${section.key}`}>
-                  <h3 id={`water-${section.key}`} className="text-xs uppercase tracking-[0.2em] text-[#718067]">
+                  <h3 id={`water-${section.key}`} className="text-sm text-[#718067]">
                     {section.label}
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-labelledby={`water-${section.key}`}>
@@ -353,7 +349,7 @@ export default function HistoryPage() {
                           onClick={() => setWaterContext((current) => ({ ...current, [section.key]: option }))}
                           className={`water-choice rounded-full border px-3.5 py-2 text-sm transition-all ${
                             selected
-                              ? 'water-choice-selected border-[#82a474] bg-[#243a28] text-[#d5dfca] shadow-[0_0_20px_rgba(132,169,117,0.16)]'
+                              ? 'water-choice-selected border-[#456047] bg-[#273827] text-[#c7d2bd]'
                               : 'border-[#30442f] bg-[#0d1b12] text-[#9eaa94] hover:border-[#526b49] hover:text-[#c8d8b8]'
                           }`}
                         >
@@ -364,18 +360,21 @@ export default function HistoryPage() {
                   </div>
                 </section>
               ))}
+              </div>
+
+              {markError && <p role="alert" className="mt-5 text-sm text-[#e2c2a8]">{markError}</p>}
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={saveWaterContext}
+                  disabled={!isMemoryContextSelection(waterContext) || savingMark}
+                  className="w-full rounded-[1rem_1.25rem_0.9rem_1.15rem] bg-[#71865f] px-6 py-3 text-sm font-medium text-[#0a1710] transition-colors hover:bg-[#82966f] disabled:opacity-30 sm:w-auto sm:min-w-56"
+                >
+                  {savingMark ? 'remembering...' : 'mark this water'}
+                </button>
+              </div>
             </div>
-
-            {markError && <p role="alert" className="mt-6 text-sm text-[#e2c2a8]">{markError}</p>}
-
-            <button
-              type="button"
-              onClick={saveWaterContext}
-              disabled={!isMemoryContextSelection(waterContext) || savingMark}
-              className="mt-7 w-full rounded-2xl bg-[#8fa66c] px-4 py-3 text-sm font-medium text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-[0.99] disabled:opacity-30"
-            >
-              {savingMark ? 'remembering...' : 'mark this water'}
-            </button>
           </div>
         </div>,
         document.body,

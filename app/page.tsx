@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { parseTasks } from '@/lib/tasks'
+import { SwampScenery } from '@/app/swamp-scenery'
 
 const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
@@ -296,61 +297,5 @@ export default function Home() {
         )}
       </div>
     </main>
-  )
-}
-
-function SwampScenery() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 600 160"
-      preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
-    >
-      <g fill="none" stroke="#829b78" strokeLinecap="round" opacity="0.2">
-        <path d="M16 -4 C18 24 8 39 18 68" />
-        <path d="M35 -5 C35 28 24 47 29 82" />
-        <path d="M55 -3 C53 20 47 38 55 60" />
-        <path d="M584 -4 C580 20 590 39 580 65" />
-        <path d="M563 -4 C565 28 575 46 570 79" />
-      </g>
-      <g fill="#78936f" opacity="0.16">
-        <ellipse cx="18" cy="35" rx="5" ry="2" transform="rotate(-28 18 35)" />
-        <ellipse cx="30" cy="58" rx="5" ry="2" transform="rotate(30 30 58)" />
-        <ellipse cx="54" cy="38" rx="4" ry="2" transform="rotate(-22 54 38)" />
-        <ellipse cx="581" cy="34" rx="5" ry="2" transform="rotate(25 581 34)" />
-        <ellipse cx="570" cy="58" rx="5" ry="2" transform="rotate(-30 570 58)" />
-      </g>
-
-      <path d="M0 126 C110 117 180 139 290 128 C410 116 490 136 600 123 L600 160 L0 160 Z" fill="#78936f" opacity="0.1" />
-
-      <g fill="#476d43" opacity="0.42">
-        <ellipse cx="82" cy="141" rx="17" ry="5" transform="rotate(-7 82 141)" />
-        <path d="M82 141 L91 136 L88 144 Z" fill="#09150e" />
-        <ellipse cx="500" cy="137" rx="21" ry="7" transform="rotate(8 500 137)" />
-        <path d="M500 137 L510 130 L508 140 Z" fill="#09150e" />
-        <ellipse cx="548" cy="149" rx="12" ry="4" transform="rotate(-10 548 149)" />
-      </g>
-
-      <g fill="#8ea77d" opacity="0.28">
-        <path d="M145 137 C151 130 158 133 159 139 C154 142 149 143 145 137 Z" />
-        <path d="M427 143 C433 136 440 139 441 145 C435 147 431 148 427 143 Z" />
-      </g>
-
-      <g opacity="0.34">
-        <g transform="translate(32 143)">
-          <circle r="2.4" fill="#b4bf8b" />
-          <circle cx="-4" r="2.2" fill="#7d916b" />
-          <circle cx="4" r="2.2" fill="#7d916b" />
-          <circle cy="-4" r="2.2" fill="#7d916b" />
-        </g>
-        <g transform="translate(570 139)">
-          <circle r="2.2" fill="#b4bf8b" />
-          <circle cx="-3.6" r="2" fill="#7d916b" />
-          <circle cx="3.6" r="2" fill="#7d916b" />
-          <circle cy="-3.6" r="2" fill="#7d916b" />
-        </g>
-      </g>
-    </svg>
   )
 }

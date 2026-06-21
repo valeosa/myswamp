@@ -38,10 +38,6 @@ export default function RootLayout({
     className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
   >
     <body className={geistSans.className}>
-      <nav aria-label="Legal" className="fixed left-4 top-4 z-50 flex h-10 items-center gap-4 text-xs text-[#718067]">
-        <Link href="/privacy" className="transition-colors hover:text-[#a7b69a]">privacy policy</Link>
-        <Link href="/terms" className="transition-colors hover:text-[#a7b69a]">terms of service</Link>
-      </nav>
       <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
         <Show when="signed-out">
           <SignInButton>

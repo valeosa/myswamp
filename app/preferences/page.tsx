@@ -161,6 +161,11 @@ export default function PreferencesPage() {
             </div>
           </div>
         )}
+
+        <nav aria-label="Legal" className="flex gap-4 pt-6 text-xs text-[#718067]">
+          <Link href="/privacy" className="transition-colors hover:text-[#a7b69a]">privacy policy</Link>
+          <Link href="/terms" className="transition-colors hover:text-[#a7b69a]">terms of service</Link>
+        </nav>
       </div>
 
       {deleteOpen && (
