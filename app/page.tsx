@@ -238,16 +238,18 @@ export default function Home() {
 
         {frog && (
           <div key={frogId} className="mist-reveal space-y-3">
-            {taskCount > 1 && chosenTask && (
-              <div className="p-4 rounded-2xl bg-[#0b120e] border border-[#33452d]/50">
-                <div className="text-[#7f8f73] text-xs mb-2">frog</div>
-                <div className="text-[#c8d8b8]">{chosenTask}</div>
-              </div>
-            )}
+            <div className="rounded-2xl border border-[#4f6f3d]/50 bg-[#0d1510] p-5">
+              {chosenTask && (
+                <div>
+                  <div className="mb-2 text-xs text-[#7f8f73]">your frog</div>
+                  <div className="text-lg text-[#c8d8b8]">{chosenTask}</div>
+                </div>
+              )}
 
-            <div className="p-5 rounded-2xl bg-[#111713] border border-[#4f6f3d]/50">
-              <div className="text-[#7f8f73] text-xs mb-2">start here</div>
-              <div className="text-lg text-[#c8d8b8]">{frog}</div>
+              <div className={chosenTask ? 'mt-5 border-t border-[#33452d]/45 pt-4' : ''}>
+                <div className="mb-2 text-xs text-[#7f8f73]">first step</div>
+                <div className="text-base text-[#b9c9aa]">{frog}</div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
