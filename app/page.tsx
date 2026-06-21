@@ -292,7 +292,7 @@ export default function Home() {
 
         {reliefMessage && (
           <div role="status" className="lighter-veil fixed inset-0 z-50 flex items-center justify-center">
-            <p className="simmer-text text-lg text-[#c8d8b8]">it’s lighter now.</p>
+            <p className="simmer-text text-2xl font-semibold text-[#c8d8b8]">it’s lighter now.</p>
           </div>
         )}
       </div>
