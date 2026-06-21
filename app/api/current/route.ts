@@ -36,8 +36,14 @@ export async function GET() {
     if (legacyTadpoles.length > 0) {
       const { error: backfillError } = await supabase
         .from('tadpoles')
-        .upsert(legacyTadpoles, { ignoreDuplicates: true })
-      if (backfillError) throw backfillError
+        .upsert(legacyTadpoles, {
+          onConflict: 'source_frog_id,position',
+          ignoreDuplicates: true,
+        })
+
+      // Backfilling old records is maintenance, not part of reading the
+      // user's current water. Never take the page down if that repair fails.
+      if (backfillError) console.warn('legacy tadpole backfill skipped', backfillError)
     }
 
     const { data: tadpoles, error: tadpolesError } = await supabase
