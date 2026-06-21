@@ -174,7 +174,7 @@ export default function CurrentPage() {
           <section className="space-y-2">
             <div className="flex items-center justify-between gap-4 text-[#718b75]">
               <p className="text-sm italic">
-                {tadpoles.length === 1 ? 'one tadpole in the water' : `${tadpoles.length} tadpoles in the water`}
+                {tadpoles.length} {tadpoles.length === 1 ? 'tadpole' : 'tadpoles'}
               </p>
               {tadpoles.length > 1 && (
                 <button
@@ -186,7 +186,7 @@ export default function CurrentPage() {
                 </button>
               )}
             </div>
-            <div className="divide-y divide-[#1d3325] border-y border-[#1d3325]">
+            <div className="divide-y divide-[#1d3325]">
               {tadpoles.map((tadpole) => (
                 <div key={tadpole.id} className="flex items-center justify-between gap-4 px-1 py-4 text-[#b9c9ac]">
                   <span className="flex min-w-0 items-center gap-3">

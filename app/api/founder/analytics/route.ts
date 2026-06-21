@@ -70,6 +70,8 @@ export async function GET() {
 
     if (signupsResult.error) throw signupsResult.error
 
+    const dataHealthResult = await supabase.rpc('get_founder_data_health')
+
     return Response.json({
       analyticsReady,
       generatedAt: new Date().toISOString(),
@@ -80,6 +82,8 @@ export async function GET() {
         signups: signupsResult.metric,
         completions,
       },
+      dataHealthReady: !dataHealthResult.error,
+      dataHealth: dataHealthResult.error ? null : dataHealthResult.data,
     })
   } catch (error) {
     console.error('founder analytics failed', error)
