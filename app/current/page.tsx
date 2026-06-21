@@ -165,47 +165,51 @@ export default function CurrentPage() {
 
         {active && (
           <section className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#6f9376]">current frog</p>
+            <p className="text-sm italic text-[#718b75]">current frog</p>
             <FrogCard frog={active} current />
           </section>
         )}
 
         {tadpoles.length > 0 && (
-          <section className="space-y-3">
-            <div className="flex items-center justify-between text-[#6f9376]">
-              <p className="text-xs uppercase tracking-[0.2em]">tadpoles</p>
-              <div className="flex items-center gap-4">
-                <span className="text-sm">{tadpoles.length}</span>
-                {tadpoles.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmClearAll(true)}
-                    className="text-xs text-[#718b75] underline decoration-[#40573d] underline-offset-4 transition-colors hover:text-[#a8bd96]"
-                  >
-                    clear all tadpoles
-                  </button>
-                )}
-              </div>
-            </div>
-            {tadpoles.map((tadpole) => (
-              <div key={tadpole.id} className="flex items-center justify-between gap-4 rounded-2xl border border-[#294532]/70 bg-[#0b1710] px-5 py-4 text-[#c8d8b8]">
-                <span>{tadpole.task_text}</span>
+          <section className="space-y-2">
+            <div className="flex items-center justify-between gap-4 text-[#718b75]">
+              <p className="text-sm italic">
+                {tadpoles.length === 1 ? 'one tadpole in the water' : `${tadpoles.length} tadpoles in the water`}
+              </p>
+              {tadpoles.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => clearTadpole(tadpole.id)}
-                  disabled={Boolean(clearingTadpoleId) || clearingAllTadpoles}
-                  className="shrink-0 rounded-full border border-[#334b35] px-3 py-1.5 text-xs text-[#8fa087] transition-colors hover:bg-[#334b35] hover:text-[#d6e3ca] disabled:opacity-35"
+                  onClick={() => setConfirmClearAll(true)}
+                  className="text-xs opacity-70 transition-opacity hover:opacity-100"
                 >
-                  {clearingTadpoleId === tadpole.id ? 'clearing...' : 'clear'}
+                  clear all
                 </button>
-              </div>
-            ))}
+              )}
+            </div>
+            <div className="divide-y divide-[#1d3325] border-y border-[#1d3325]">
+              {tadpoles.map((tadpole) => (
+                <div key={tadpole.id} className="flex items-center justify-between gap-4 px-1 py-4 text-[#b9c9ac]">
+                  <span className="flex min-w-0 items-center gap-3">
+                    <LilyIcon className="text-[#526b50]" />
+                    <span>{tadpole.task_text}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => clearTadpole(tadpole.id)}
+                    disabled={Boolean(clearingTadpoleId) || clearingAllTadpoles}
+                    className="shrink-0 px-2 py-1 text-xs text-[#718b75] opacity-75 transition-opacity hover:opacity-100 disabled:opacity-35"
+                  >
+                    {clearingTadpoleId === tadpole.id ? 'clearing...' : 'clear'}
+                  </button>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
         {pending.length > 0 && (
           <section className="space-y-5 pt-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#6f9376]">pending frogs</p>
+            <p className="text-sm italic text-[#718b75]">pending frogs</p>
             {pending.map((frog) => (
               <FrogCard
                 key={frog.id}
