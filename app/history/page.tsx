@@ -330,7 +330,7 @@ export default function HistoryPage() {
                   value={eraName}
                   onChange={(event) => setEraName(event.target.value)}
                   maxLength={MAX_ERA_NAME_LENGTH}
-                  placeholder="building mySwamp pre-uni"
+                  placeholder="starting a new chapter"
                   className="mt-3 w-full border-0 border-b border-[#30442f] bg-transparent px-0 py-2 text-[#c8d8b8] outline-none placeholder:text-[#516052] focus:border-[#8fa66c]"
                 />
               </div>
