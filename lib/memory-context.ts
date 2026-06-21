@@ -11,6 +11,8 @@ export const memoryContextOptions = {
   ],
 } as const
 
+export const MAX_ERA_NAME_LENGTH = 80
+
 export type MemoryContextSelection = {
   [Key in keyof typeof memoryContextOptions]: (typeof memoryContextOptions)[Key][number]
 }

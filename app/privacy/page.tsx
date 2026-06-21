@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <li>Account identifiers and sign-in information handled by Clerk.</li>
           <li>Your task dumps, assigned frog, tadpoles, small action, frog/tadpole completion status, whether tadpoles were cleared individually or in bulk, and associated timestamps when you use a signed-in account.</li>
           <li>If you opt into Deep Swamp analysis, each task in a dump, which task became the frog, your local timezone/hour/day, and later completion or “not yet” events are stored together to look for your personal patterns.</li>
-          <li>Water marks you choose to add in memory, including season, life context, energy, moment, and when you marked them.</li>
+          <li>Water marks you choose to add in memory, including an optional era name, season, life context, energy, moment, and when you marked them.</li>
           <li>Email and feedback preferences you choose in settings.</li>
           <li>Basic product analytics: page visits and counts of dumps, generated frogs, and completions. The first-party analytics table does not store task text, your name, email, or IP address.</li>
           <li>Technical information processed by hosting, security, and analytics providers as part of operating the service.</li>

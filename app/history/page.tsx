@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
 import {
   isMemoryContextSelection,
+  MAX_ERA_NAME_LENGTH,
   memoryContextOptions,
   type MemoryContextSelection,
 } from '@/lib/memory-context'
@@ -66,6 +67,8 @@ export default function HistoryPage() {
   const [error, setError] = useState('')
   const [markPanelOpen, setMarkPanelOpen] = useState(false)
   const [waterContext, setWaterContext] = useState<Partial<MemoryContextSelection>>({})
+  const [eraName, setEraName] = useState('')
+  const [currentEraName, setCurrentEraName] = useState('')
   const [savingMark, setSavingMark] = useState(false)
   const [markError, setMarkError] = useState('')
   const [waterMessage, setWaterMessage] = useState('')
@@ -80,6 +83,12 @@ export default function HistoryPage() {
         if (!response.ok) throw new Error(data.error || 'The water’s memory is cloudy right now.')
         const hidden = locallyHiddenFrogs()
         setFrogs((data.frogs ?? []).filter((frog: Frog) => !hidden.has(frog.id)))
+
+        const contextResponse = await fetch('/api/memory-contexts')
+        if (contextResponse.ok) {
+          const contextData = await contextResponse.json()
+          setCurrentEraName(contextData.context?.era_name ?? '')
+        }
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : 'The water’s memory is cloudy right now.')
       } finally {
@@ -140,12 +149,14 @@ export default function HistoryPage() {
       const response = await fetch('/api/memory-contexts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(waterContext),
+        body: JSON.stringify({ ...waterContext, era_name: eraName }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'The water could not hold that mark.')
 
       setWaterContext({})
+      setEraName('')
+      setCurrentEraName(data.context?.era_name ?? '')
       setMarkPanelOpen(false)
       setWaterMessage('the water remembers.')
       window.setTimeout(() => setWaterMessage(''), 2800)
@@ -180,6 +191,12 @@ export default function HistoryPage() {
         </div>
 
         {waterMessage && <p role="status" className="water-whisper text-sm italic text-[#8fa66c]">{waterMessage}</p>}
+        {currentEraName && (
+          <p className="text-sm text-[#8fa66c]">
+            <span className="mr-2 text-xs uppercase tracking-[0.16em] text-[#607a62]">current era</span>
+            {currentEraName}
+          </p>
+        )}
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
         {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
@@ -303,6 +320,21 @@ export default function HistoryPage() {
             </div>
 
             <div className="mt-7 space-y-6">
+              <div>
+                <label htmlFor="era-name" className="text-xs uppercase tracking-[0.2em] text-[#718067]">
+                  name this era <span className="normal-case tracking-normal opacity-70">(optional)</span>
+                </label>
+                <input
+                  id="era-name"
+                  type="text"
+                  value={eraName}
+                  onChange={(event) => setEraName(event.target.value)}
+                  maxLength={MAX_ERA_NAME_LENGTH}
+                  placeholder="building mySwamp pre-uni"
+                  className="mt-3 w-full border-0 border-b border-[#30442f] bg-transparent px-0 py-2 text-[#c8d8b8] outline-none placeholder:text-[#516052] focus:border-[#8fa66c]"
+                />
+              </div>
+
               {memorySections.map((section) => (
                 <section key={section.key} aria-labelledby={`water-${section.key}`}>
                   <h3 id={`water-${section.key}`} className="text-xs uppercase tracking-[0.2em] text-[#718067]">
