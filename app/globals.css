@@ -3,6 +3,7 @@
 :root {
   --background: #07100b;
   --foreground: #c8d8b8;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -16,6 +17,66 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: #38563d;
+  color: #d6e3ca;
+}
+
+input,
+textarea,
+select,
+button {
+  color-scheme: dark;
+}
+
+input,
+textarea,
+select {
+  caret-color: #9fb77b;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  border-color: #38563d !important;
+  -webkit-text-fill-color: #c8d8b8 !important;
+  caret-color: #9fb77b !important;
+  -webkit-box-shadow: 0 0 0 1000px #0b1710 inset !important;
+  box-shadow: 0 0 0 1000px #0b1710 inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+option,
+optgroup {
+  background: #0b1710;
+  color: #c8d8b8;
+}
+
+* {
+  scrollbar-color: #38563d #07100b;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #07100b;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid #07100b;
+  border-radius: 999px;
+  background: #38563d;
 }
 
 button,
