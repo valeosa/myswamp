@@ -172,14 +172,16 @@ export default function HistoryPage() {
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 font-sans text-[#c8d8b8]">
       <div className="max-w-2xl mx-auto space-y-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-[#8fa66c] text-sm opacity-70 transition-opacity hover:opacity-100">
-          <LilyIcon /> {!isSignedIn || (!loading && frogs.length === 0) ? 'back' : 'back to swamp'}
-        </Link>
+        <nav aria-label="Memory navigation" className="flex items-center gap-5 text-sm text-[#8fa66c]">
+          <Link href="/" className="inline-flex items-center gap-2 opacity-70 transition-opacity hover:opacity-100">
+            <LilyIcon /> {!isSignedIn || (!loading && frogs.length === 0) ? 'back' : 'back to swamp'}
+          </Link>
+          {isSignedIn && <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>}
+        </nav>
 
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-[#c8d8b8]">the water’s memory</h1>
-            <p className="mt-1 text-sm italic text-[#718b75]">what surfaced, what was done</p>
           </div>
           {isLoaded && (
             <button
@@ -194,10 +196,7 @@ export default function HistoryPage() {
 
         {waterMessage && <p role="status" className="water-whisper text-sm italic text-[#8fa66c]">{waterMessage}</p>}
         {currentEraName && (
-          <p className="text-sm text-[#8fa66c]">
-            <span className="mr-2 text-xs uppercase tracking-[0.16em] text-[#607a62]">current era</span>
-            {currentEraName}
-          </p>
+          <p className="text-sm text-[#8fa66c]">{currentEraName}</p>
         )}
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
@@ -224,10 +223,6 @@ export default function HistoryPage() {
 
           return (
             <article key={item.id} className="mist-reveal group relative space-y-3 rounded-2xl border border-lime-900/40 bg-[#0b1710] p-5 pb-12 transition-colors hover:border-[#38522e]">
-              <div className="flex justify-end text-xs text-[#8fa66c]">
-                <span>finished</span>
-              </div>
-
               <div>
                 <p className="text-[#8fa66c] text-sm">frog</p>
                 <p className="text-[#c8d8b8]">{displayFrog}</p>

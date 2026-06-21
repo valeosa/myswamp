@@ -131,9 +131,12 @@ export default function CurrentPage() {
   return (
     <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 text-[#c8d8b8]">
       <div className="mx-auto max-w-2xl space-y-7">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
-          <LilyIcon /> back
-        </Link>
+        <nav aria-label="Current navigation" className="flex items-center gap-5 text-sm text-[#8fa66c]">
+          <Link href="/" className="inline-flex items-center gap-2 opacity-70 transition-opacity hover:opacity-100">
+            <LilyIcon /> back
+          </Link>
+          <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</Link>
+        </nav>
 
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -212,10 +215,6 @@ export default function CurrentPage() {
           </section>
         )}
 
-        <nav className="flex gap-5 pt-5 text-sm text-[#8fa66c]">
-          <Link href="/" className="opacity-70 hover:opacity-100">swamp</Link>
-          <Link href="/history" className="opacity-70 hover:opacity-100">the water’s memory</Link>
-        </nav>
       </div>
 
       {reliefMessage && (
