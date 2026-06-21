@@ -40,6 +40,14 @@ Good: “Across your last 14 creative frogs, you finished faster when admin tadp
 
 Bad: “Admin tasks make you creative.”
 
+## Water-context vocabulary
+
+- `scattered` energy: attention is fragmented across several directions.
+- `unstable` energy: emotional or functional capacity is shifting unpredictably.
+- `before something big`: an upcoming change feels clear and emotionally heightened, such as excitement, nerves, or bracing.
+- `liminal`: the next path is visible, but the person has not arrived in it yet and is moving through the in-between.
+- `unstable` moment: the surrounding period itself lacks steady ground or is changing unpredictably.
+
 ## Product sequence
 
 1. Collect consented assignment and outcome data.
