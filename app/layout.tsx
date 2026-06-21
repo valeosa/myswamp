@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import VisitorTracker from "./visitor-tracker";
 import { AccountMenu } from "./account-menu";
 import "./globals.css";
@@ -83,6 +84,7 @@ export default function RootLayout({
       {children}
       <VisitorTracker />
       <Analytics />
+      <SpeedInsights />
     </body>
   </html>
 </ClerkProvider>
