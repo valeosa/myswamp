@@ -67,6 +67,15 @@ summary {
   filter: brightness(1.06);
 }
 
+.start-details .lily-toggle {
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.start-details[open] .lily-toggle {
+  transform: rotate(180deg);
+}
+
 @keyframes surface-from-mist {
   0% { opacity: 0; transform: translateY(8px); }
   55% { opacity: 0.55; }

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import OpenAI from "openai";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { parseTasks, tasksAreEquivalent } from "@/lib/tasks";
+import { getTadpoleItems, parseTasks, tasksAreEquivalent } from "@/lib/tasks";
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
 
@@ -369,7 +369,7 @@ firstStep = parsed.first_step;
           }
         : {}),
     })
-    .select("id")
+    .select("id, created_at")
     .single();
 
   if (frogError) throw frogError;
@@ -394,6 +394,26 @@ firstStep = parsed.first_step;
   ]);
 
   if (eventsError) throw eventsError;
+
+  const tadpoleItems = getTadpoleItems(tasks, chosenTask, firstStep);
+  if (tadpoleItems.length > 0) {
+    const { error: tadpolesError } = await supabase
+      .from("tadpoles")
+      .upsert(
+        tadpoleItems.map((item) => ({
+          user_id: userId,
+          account_id: account.id,
+          source_frog_id: savedFrog.id,
+          position: item.position,
+          task_text: item.taskText,
+          task_key: item.taskKey,
+          created_at: savedFrog.created_at,
+        })),
+        { ignoreDuplicates: true },
+      );
+
+    if (tadpolesError) throw tadpolesError;
+  }
 
   if (deepSwampContext) {
     const { error: taskItemsError } = await supabase

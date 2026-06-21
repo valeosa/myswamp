@@ -1,12 +1,12 @@
 export const memoryContextOptions = {
   season: ['spring', 'summer', 'autumn', 'winter'],
   life_context: [
-    'school', 'work', 'project', 'friends', 'outreach', 'travel',
-    'family', 'health', 'money', 'moving', 'exams', 'other',
+    'school', 'work', 'project', 'friends', 'travel',
+    'family', 'health', 'money', 'moving', 'exams',
   ],
   energy: ['low', 'okay', 'wired', 'scattered', 'unstable', 'calm'],
   moment: [
-    'normal day', 'transition', 'deadline', 'holiday', 'before something big',
+    'normal day', 'deadline', 'holiday', 'before something big',
     'after something big', 'liminal', 'unstable',
   ],
 } as const

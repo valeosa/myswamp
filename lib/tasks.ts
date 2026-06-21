@@ -7,13 +7,13 @@ export function parseTasks(taskDump: string) {
     .filter(Boolean)
 }
 
-function comparableTask(task: string) {
+export function taskKey(task: string) {
   return task.toLocaleLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
 }
 
 export function tasksAreEquivalent(left: string, right: string) {
-  const comparableLeft = comparableTask(left)
-  const comparableRight = comparableTask(right)
+  const comparableLeft = taskKey(left)
+  const comparableRight = taskKey(right)
   if (!comparableLeft || !comparableRight) return false
   return comparableLeft === comparableRight
     || comparableLeft.includes(comparableRight)
@@ -28,18 +28,26 @@ export function getDisplayFrog(taskDump: string, chosenTask: string | null, frog
 }
 
 export function getTadpoles(taskDump: string, chosenTask: string | null, frogText?: string) {
+  return getTadpoleItems(taskDump, chosenTask, frogText).map((item) => item.taskText)
+}
+
+export function getTadpoleItems(taskDump: string, chosenTask: string | null, frogText?: string) {
   const tasks = parseTasks(taskDump)
   const selectedTask = chosenTask || frogText
   if (!selectedTask) return []
 
   let removedFrog = false
 
-  const tadpoles = tasks.filter((task) => {
-    if (removedFrog) return true
+  const tadpoles = tasks.flatMap((task, position) => {
+    const item = { position, taskText: task, taskKey: taskKey(task) || task.toLocaleLowerCase() }
+    if (removedFrog) return [item]
 
     const isFrog = tasksAreEquivalent(task, selectedTask)
-    if (isFrog) removedFrog = true
-    return !isFrog
+    if (isFrog) {
+      removedFrog = true
+      return []
+    }
+    return [item]
   })
 
   // Old records sometimes stored only a generated first step, not the

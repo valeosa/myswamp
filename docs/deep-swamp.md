@@ -5,6 +5,7 @@ Deep Swamp is the future personalised pattern layer for mySwamp. Its purpose is 
 ## Current foundation
 
 - Signed-in frog assignments store the raw dump, selected source task, generated first action, assignment time, completion time, and immutable `done` / `not yet` events.
+- Tadpoles persist independently of frog status. Individual and bulk clears create immutable events with their source frog and elapsed time; bulk clears remain distinguishable so they are not treated as separate deliberate completions.
 - People can explicitly opt into Deep Swamp analysis in preferences.
 - Opted-in assignments store each frog and tadpole as a separate task-item snapshot, plus local timezone, hour, weekday, and task count.
 - Opting out stops future Deep Swamp capture and deletes the extra task-item and local-time context. Ordinary frog history remains.
@@ -17,9 +18,11 @@ Deep Swamp is the future personalised pattern layer for mySwamp. Its purpose is 
 - [ ] Label task category: admin, creative, domestic, financial, health, school, social, work, or other.
 - [ ] Extract explicit/inferred deadlines with confidence.
 - [ ] Detect whether another person is waiting and whether a task is a social obligation.
+- [ ] Detect whether a frog or tadpole is primarily physical, separately from its life category.
 - [ ] Build an internal data-quality view before showing user-facing insights.
 - [ ] Define observation windows for active, stalled, completed, and abandoned frogs.
 - [ ] Exclude active (right-censored) frogs from naive completion-time averages.
+- [ ] Compare tadpole-clear latency by tadpole category, source-frog category, and clear method.
 - [ ] Join each frog to the newest water mark at or before its assignment time, without copying or mutating the frog record.
 
 ## Insight rules
@@ -41,6 +44,8 @@ Good: “Across your last 14 creative frogs, you finished faster when admin tadp
 Bad: “Admin tasks make you creative.”
 
 ## Water-context vocabulary
+
+The active vocabulary intentionally excludes catch-all `other` values and overlapping labels such as `outreach` and `transition`; marks should remain interpretable enough to support real comparisons.
 
 - `scattered` energy: attention is fragmented across several directions.
 - `unstable` energy: emotional or functional capacity is shifting unpredictably.
