@@ -20,7 +20,7 @@ export function AccountMenu() {
         <UserButton.MenuItems>
           <UserButton.Link
             href="/preferences"
-            label="preferences"
+            label="Preferences"
             labelIcon={<LilyIcon className="h-3.5 w-4.5" />}
           />
         </UserButton.MenuItems>
