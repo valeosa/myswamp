@@ -283,7 +283,7 @@ export default function Home() {
             {isSignedIn && <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>}
             {hasMemory && (
               isSignedIn
-                ? <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</Link>
+                ? <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">my water’s memory</Link>
                 : <button type="button" onClick={() => openSignIn()} className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
             )}
           </nav>
