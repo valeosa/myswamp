@@ -62,7 +62,7 @@ function readableDate(value: string) {
 
 export default function HistoryPage() {
   const { isLoaded, isSignedIn } = useAuth()
-  const { openSignIn } = useClerk()
+  const { openSignUp } = useClerk()
   const [frogs, setFrogs] = useState<Frog[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
@@ -134,7 +134,7 @@ export default function HistoryPage() {
 
   function openMarkPanel() {
     if (!isSignedIn) {
-      openSignIn()
+      openSignUp()
       return
     }
 

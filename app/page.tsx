@@ -12,7 +12,7 @@ const MAX_TASKS = 25
 
 export default function Home() {
   const { userId, isLoaded, isSignedIn } = useAuth()
-  const { openSignIn } = useClerk()
+  const { openSignUp } = useClerk()
   const [tasks, setTasks] = useState('')
   const [frog, setFrog] = useState('')
   const [frogId, setFrogId] = useState('')
@@ -99,7 +99,7 @@ export default function Home() {
 
       if (!response.ok) {
         if (!isSignedIn && response.status === 429 && data.code === 'guest_quota_reached') {
-          openSignIn()
+          openSignUp()
           return
         }
 
@@ -294,7 +294,7 @@ export default function Home() {
             {hasMemory && (
               isSignedIn
                 ? <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">my water’s memory</Link>
-                : <button type="button" onClick={() => openSignIn()} className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
+                : <button type="button" onClick={() => openSignUp()} className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
             )}
           </nav>
         )}
