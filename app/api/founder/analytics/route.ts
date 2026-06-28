@@ -23,7 +23,7 @@ export async function GET() {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
     async function countPair(
-      table: 'analytics_events' | 'app_users' | 'frogs' | 'frog_events',
+      table: 'analytics_events' | 'app_users' | 'frogs' | 'frog_events' | 'frog_generation_quota_events',
       timeColumn: 'occurred_at' | 'created_at',
       filter?: { column: 'event_name' | 'event_type'; value: string },
     ): Promise<{ metric: Metric; error: unknown }> {
@@ -41,12 +41,13 @@ export async function GET() {
       }
     }
 
-    const [visitsResult, dumpsResult, generationsResult, completionsResult, signupsResult] = await Promise.all([
+    const [visitsResult, dumpsResult, generationsResult, completionsResult, signupsResult, apiAttemptsResult] = await Promise.all([
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'visit' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'task_dumped' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'frog_generated' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'frog_completed' }),
       countPair('app_users', 'created_at'),
+      countPair('frog_generation_quota_events', 'occurred_at'),
     ])
 
     let visits = visitsResult.metric
@@ -79,6 +80,7 @@ export async function GET() {
         visits,
         taskDumps: dumps,
         frogGenerations: generations,
+        frogApiAttempts: apiAttemptsResult.error ? { total: 0, last7Days: 0 } : apiAttemptsResult.metric,
         signups: signupsResult.metric,
         completions,
       },

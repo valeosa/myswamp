@@ -7,12 +7,14 @@ import { getTadpoleItems, parseTasks, taskKey, tasksAreEquivalent } from "@/lib/
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
 import { parseLocalContext } from "@/lib/local-context";
+import { consumeFrogDailyQuota, frogBurstLimit, frogQuotaKey } from "@/lib/frog-quota";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
 const DEEP_SWAMP_CAPTURE_VERSION = "assignment-context-v1";
 const FROG_MODEL = "gpt-4.1";
 const FROG_PROMPT_VERSION = "frog-picker-v2";
+const FROG_COMPLETION_MAX_TOKENS = 150;
 
 type FrogChoice = { chosen_task: string; first_step: string };
 
@@ -100,8 +102,10 @@ export async function GET() {
 async function chooseFrog(req: Request) {
   const { userId } = await auth();
   const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const userAgent = req.headers.get("user-agent")?.slice(0, 240);
   const visitorKey = userId ?? `guest:${forwardedFor || "unknown"}`;
-  const rateLimit = checkRateLimit(`frog:${visitorKey}`, userId ? 10 : 3, 10 * 60 * 1000);
+  const quotaScope = userId ? "signed_in" : "guest";
+  const rateLimit = checkRateLimit(`frog:${visitorKey}`, frogBurstLimit(quotaScope), 10 * 60 * 1000);
   if (!rateLimit.allowed) {
     return Response.json(
       { error: "The swamp needs a moment. Try again soon." },
@@ -178,7 +182,39 @@ async function chooseFrog(req: Request) {
     }
   }
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const quota = await consumeFrogDailyQuota({
+    scope: quotaScope,
+    keyHash: frogQuotaKey({ userId, ip: forwardedFor, userAgent }),
+    accountId: account?.id ?? null,
+  });
+
+  const quotaHeaders = {
+    "X-Frog-Daily-Limit": String(quota.limit),
+    "X-Frog-Daily-Remaining": String(quota.remaining),
+  };
+
+  if (!quota.allowed) {
+    const message = userId
+      ? "The swamp has surfaced enough frogs today. Come back tomorrow."
+      : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
+
+    return Response.json(
+      { error: message, quota: { limit: quota.limit, remaining: 0 } },
+      {
+        status: 429,
+        headers: {
+          ...quotaHeaders,
+          "Retry-After": String(quota.retryAfter),
+        },
+      },
+    );
+  }
+
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    timeout: 10_000,
+    maxRetries: 1,
+  });
 
 const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
   vaguePattern.test(t.trim())
@@ -364,6 +400,7 @@ ${tasksToSend}
   const completion = await client.chat.completions.create({
     model: FROG_MODEL,
     temperature: 0.2,
+    max_completion_tokens: FROG_COMPLETION_MAX_TOKENS,
     response_format: frogChoiceSchema,
     messages: [
       {
@@ -390,6 +427,7 @@ ${tasksToSend}
     const repair = await client.chat.completions.create({
       model: FROG_MODEL,
       temperature: 0,
+      max_completion_tokens: FROG_COMPLETION_MAX_TOKENS,
       response_format: frogChoiceSchema,
       messages: [
         {
@@ -427,7 +465,8 @@ ${tasksToSend}
       first_step: firstStep,
       frog: firstStep,
       guest: true,
-    });
+      quota: { limit: quota.limit, remaining: quota.remaining },
+    }, { headers: quotaHeaders });
   }
 
   if (!account || !supabase) throw new Error("The signed-in account could not be loaded");
@@ -491,7 +530,8 @@ ${tasksToSend}
     chosen_task: chosenTask,
     first_step: firstStep,
     frog: firstStep,
-  });
+    quota: { limit: quota.limit, remaining: quota.remaining },
+  }, { headers: quotaHeaders });
 }
 
 export async function POST(req: Request) {
