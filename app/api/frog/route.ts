@@ -112,7 +112,7 @@ async function chooseFrog(req: Request) {
       : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
 
     return Response.json(
-      { error: message },
+      { error: message, code: userId ? "frog_burst_limited" : "guest_quota_reached" },
       { status: 429, headers: { "Retry-After": String(rateLimit.retryAfter) } },
     );
   }
@@ -203,7 +203,11 @@ async function chooseFrog(req: Request) {
       : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
 
     return Response.json(
-      { error: message, quota: { limit: quota.limit, remaining: 0 } },
+      {
+        error: message,
+        code: userId ? "frog_daily_quota_reached" : "guest_quota_reached",
+        quota: { limit: quota.limit, remaining: 0 },
+      },
       {
         status: 429,
         headers: {

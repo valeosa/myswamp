@@ -78,6 +78,7 @@ export default function Home() {
 
   const taskCount = parseTasks(tasks).length
   const dumpIsTooLarge = tasks.length > MAX_DUMP_LENGTH || taskCount > MAX_TASKS
+  const showDumpComma = !taskBoxActive && !tasks.trim() && !frog
 
   async function pickFrog() {
     if (!isLoaded || !tasks.trim() || frog || dumpIsTooLarge) return
@@ -96,7 +97,14 @@ export default function Home() {
       })
       const data = await response.json()
 
-      if (!response.ok) throw new Error(data.error || 'The swamp could not choose a frog.')
+      if (!response.ok) {
+        if (!isSignedIn && response.status === 429 && data.code === 'guest_quota_reached') {
+          openSignIn()
+          return
+        }
+
+        throw new Error(data.error || 'The swamp could not choose a frog.')
+      }
 
       setFrogId(data.id ?? '')
       setChosenTask(data.chosen_task ?? '')
@@ -171,7 +179,7 @@ export default function Home() {
         {isLoaded && !isSignedIn && (
           <div className="space-y-1 text-center">
             <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">
-              {taskBoxActive ? 'dump your tasks' : 'dump your tasks,'}
+              {showDumpComma ? 'dump your tasks,' : 'dump your tasks'}
             </h1>
             {!frog && <p className="text-sm italic text-[#8fa66c]">the swamp surfaces one thing to do next.</p>}
           </div>
