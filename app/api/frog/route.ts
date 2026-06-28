@@ -107,8 +107,12 @@ async function chooseFrog(req: Request) {
   const quotaScope = userId ? "signed_in" : "guest";
   const rateLimit = checkRateLimit(`frog:${visitorKey}`, frogBurstLimit(quotaScope), 10 * 60 * 1000);
   if (!rateLimit.allowed) {
+    const message = userId
+      ? "The swamp needs a moment. Try again soon."
+      : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
+
     return Response.json(
-      { error: "The swamp needs a moment. Try again soon." },
+      { error: message },
       { status: 429, headers: { "Retry-After": String(rateLimit.retryAfter) } },
     );
   }

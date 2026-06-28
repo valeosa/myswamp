@@ -170,7 +170,9 @@ export default function Home() {
       <div className="w-full max-w-xl space-y-6">
         {isLoaded && !isSignedIn && (
           <div className="space-y-1 text-center">
-            <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">dump your tasks,</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-[#c8d8b8]">
+              {taskBoxActive ? 'dump your tasks' : 'dump your tasks,'}
+            </h1>
             {!frog && <p className="text-sm italic text-[#8fa66c]">the swamp surfaces one thing to do next.</p>}
           </div>
         )}
