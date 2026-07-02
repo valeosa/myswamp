@@ -73,12 +73,12 @@ export default function RootLayout({
     <body>
       <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
         <Show when="signed-out">
-          <SignInButton>
+          <SignInButton mode="modal">
             <button data-analytics="auth-sign-in" className="h-10 px-3 rounded-full text-sm text-[#c8d8b8] cursor-pointer transition-colors duration-200 hover:bg-[#17251b] hover:text-[#d6e3ca]">
               Sign in
             </button>
           </SignInButton>
-          <SignUpButton>
+          <SignUpButton mode="modal">
             <button data-analytics="auth-sign-up" className="bg-[#8fa66c] text-[#0a1710] rounded-full font-medium text-sm h-10 px-4 cursor-pointer transition-all duration-200 hover:bg-[#b2c791] hover:scale-[1.03] active:scale-95">
               Sign up
             </button>
