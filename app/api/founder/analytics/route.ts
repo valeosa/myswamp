@@ -41,11 +41,12 @@ export async function GET() {
       }
     }
 
-    const [visitsResult, dumpsResult, generationsResult, completionsResult, signupsResult, apiAttemptsResult] = await Promise.all([
+    const [visitsResult, dumpsResult, generationsResult, completionsResult, buttonClicksResult, signupsResult, apiAttemptsResult] = await Promise.all([
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'visit' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'task_dumped' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'frog_generated' }),
       countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'frog_completed' }),
+      countPair('analytics_events', 'occurred_at', { column: 'event_name', value: 'button_clicked' }),
       countPair('app_users', 'created_at'),
       countPair('frog_generation_quota_events', 'occurred_at'),
     ])
@@ -81,6 +82,7 @@ export async function GET() {
         taskDumps: dumps,
         frogGenerations: generations,
         frogApiAttempts: apiAttemptsResult.error ? { total: 0, last7Days: 0 } : apiAttemptsResult.metric,
+        buttonClicks: buttonClicksResult.error ? { total: 0, last7Days: 0 } : buttonClicksResult.metric,
         signups: signupsResult.metric,
         completions,
       },

@@ -145,6 +145,7 @@ export default function PreferencesPage() {
               type="button"
               onClick={savePreferences}
               disabled={saving}
+              data-analytics="preferences-save"
               className="w-full rounded-xl bg-[#8fa66c] px-4 py-3 text-sm font-medium text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-[0.99] disabled:opacity-40"
             >
               {saving ? 'remembering...' : 'save preferences'}
@@ -154,6 +155,7 @@ export default function PreferencesPage() {
               <button
                 type="button"
                 onClick={() => setDeleteOpen(true)}
+                data-analytics="account-delete-open"
                 className="text-sm text-[#9b7668] opacity-75 transition-opacity hover:opacity-100"
               >
                 delete account and all data
@@ -178,6 +180,7 @@ export default function PreferencesPage() {
                 type="button"
                 onClick={() => setDeleteOpen(false)}
                 disabled={deleting}
+                data-analytics="account-delete-cancel"
                 className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] disabled:opacity-40"
               >
                 keep my swamp
@@ -186,6 +189,7 @@ export default function PreferencesPage() {
                 type="button"
                 onClick={deleteAccount}
                 disabled={deleting}
+                data-analytics="account-delete-confirm"
                 className="rounded-xl bg-[#8f6657] px-4 py-3 text-sm text-[#0a1710] disabled:opacity-40"
               >
                 {deleting ? 'draining...' : 'delete everything'}

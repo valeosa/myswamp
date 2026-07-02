@@ -41,6 +41,7 @@ type AnalyticsData = {
     taskDumps: Metric
     frogGenerations: Metric
     frogApiAttempts: Metric
+    buttonClicks: Metric
     signups: Metric
     completions: Metric
   }
@@ -79,6 +80,7 @@ export default function FounderPage() {
     ['task dumps', data.metrics.taskDumps],
     ['frog api attempts', data.metrics.frogApiAttempts],
     ['frog generations', data.metrics.frogGenerations],
+    ['button clicks', data.metrics.buttonClicks],
     ['signups', data.metrics.signups],
     ['completions', data.metrics.completions],
   ] as const : []
@@ -119,7 +121,7 @@ export default function FounderPage() {
                 Lifecycle totals are available. Apply the founder analytics migration to begin counting visits and all guest activity.
               </p>
             )}
-            <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-7">
               {cards.map(([label, metric]) => (
                 <article key={label} className="rounded-2xl border border-[#294532] bg-[#0b1710] p-5">
                   <p className="text-xs uppercase tracking-[0.16em] text-[#718067]">{label}</p>

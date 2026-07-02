@@ -145,21 +145,34 @@ export default function CurrentPage() {
             <h1 className="text-2xl font-semibold text-[#c8d8b8]">currently</h1>
             <p className="mt-1 text-sm italic text-[#718b75]">what’s still in the water</p>
           </div>
-          {pending.length > 0 && (
-            <p className="text-sm text-[#718b75]">
-              {pending.length === 1 ? 'one frog pending' : `${pending.length} frogs pending`}
-            </p>
-          )}
         </div>
 
         {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
-        {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
+        {isLoaded && !isSignedIn && (
+          <div className="space-y-4 rounded-2xl border border-[#294532] bg-[#0b1710] p-5 text-[#8fa66c]">
+            <p>sign in, and the swamp will remember.</p>
+            <Link
+              href="/"
+              data-analytics="current-empty-back"
+              className="inline-flex rounded-full border border-[#40573d] px-4 py-2 text-sm text-[#a8bd96] transition-colors hover:bg-[#40573d] hover:text-[#d6e3ca]"
+            >
+              dump your tasks
+            </Link>
+          </div>
+        )}
         {error && <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
         {tadpoleMessage && <p role="status" className="water-whisper text-sm italic text-[#8fa66c]">{tadpoleMessage}</p>}
 
         {!loading && isSignedIn && !error && !active && pending.length === 0 && tadpoles.length === 0 && (
-          <div className="py-24 text-center text-[#718b75]">
+          <div className="flex flex-col items-center py-24 text-center text-[#718b75]">
             <p className="text-2xl font-semibold">nothing waiting.</p>
+            <Link
+              href="/"
+              data-analytics="current-empty-dump"
+              className="mt-6 rounded-full border border-[#40573d] px-4 py-2 text-sm text-[#a8bd96] transition-colors hover:bg-[#40573d] hover:text-[#d6e3ca]"
+            >
+              dump your tasks
+            </Link>
           </div>
         )}
 
@@ -180,6 +193,7 @@ export default function CurrentPage() {
                 <button
                   type="button"
                   onClick={() => setConfirmClearAll(true)}
+                  data-analytics="clear-all-tadpoles-open"
                   className="text-xs opacity-70 transition-opacity hover:opacity-100"
                 >
                   clear all
@@ -197,6 +211,7 @@ export default function CurrentPage() {
                     type="button"
                     onClick={() => clearTadpole(tadpole.id)}
                     disabled={Boolean(clearingTadpoleId) || clearingAllTadpoles}
+                    data-analytics="clear-tadpole"
                     className="shrink-0 px-2 py-1 text-xs text-[#718b75] opacity-75 transition-opacity hover:opacity-100 disabled:opacity-35"
                   >
                     {clearingTadpoleId === tadpole.id ? 'clearing...' : 'clear'}
@@ -209,7 +224,7 @@ export default function CurrentPage() {
 
         {pending.length > 0 && (
           <section className="space-y-5 pt-4">
-            <p className="text-sm italic text-[#718b75]">pending frogs</p>
+            <p className="text-sm italic text-[#718b75]">sunken frogs</p>
             {pending.map((frog) => (
               <FrogCard
                 key={frog.id}
@@ -239,6 +254,7 @@ export default function CurrentPage() {
                 type="button"
                 onClick={() => setConfirmClearAll(false)}
                 disabled={clearingAllTadpoles}
+                data-analytics="clear-all-tadpoles-cancel"
                 className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] transition-colors hover:bg-[#142018] disabled:opacity-40"
               >
                 keep them
@@ -247,6 +263,7 @@ export default function CurrentPage() {
                 type="button"
                 onClick={clearAllTadpoles}
                 disabled={clearingAllTadpoles}
+                data-analytics="clear-all-tadpoles-confirm"
                 className="rounded-xl bg-[#8fa66c] px-4 py-3 text-sm text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-95 disabled:opacity-40"
               >
                 {clearingAllTadpoles ? 'clearing...' : 'clear all'}
@@ -287,6 +304,7 @@ function FrogCard({
           type="button"
           onClick={onDone}
           disabled={clearing}
+          data-analytics={current ? 'current-frog-done' : 'sunken-frog-done'}
           className="mt-4 rounded-full border border-[#40573d] px-4 py-2 text-sm text-[#a8bd96] transition-colors hover:bg-[#40573d] hover:text-[#d6e3ca] disabled:opacity-40"
         >
           {clearing ? 'clearing...' : 'done'}

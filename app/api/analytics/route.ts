@@ -1,7 +1,7 @@
 import { checkRateLimit } from '@/lib/rate-limit'
 import { recordFounderEvents, type FounderEventName } from '@/lib/founder-analytics'
 
-const publicEvents = new Set<FounderEventName>(['visit', 'frog_completed'])
+const publicEvents = new Set<FounderEventName>(['visit', 'frog_completed', 'button_clicked'])
 
 export async function POST(req: Request) {
   try {

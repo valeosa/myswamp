@@ -2,7 +2,7 @@ import 'server-only'
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export type FounderEventName = 'visit' | 'task_dumped' | 'frog_generated' | 'frog_completed'
+export type FounderEventName = 'visit' | 'task_dumped' | 'frog_generated' | 'frog_completed' | 'button_clicked'
 
 export async function recordFounderEvents(events: Array<{ event_name: FounderEventName; path?: string }>) {
   try {

@@ -188,6 +188,7 @@ export default function HistoryPage() {
             <button
               type="button"
               onClick={openMarkPanel}
+              data-analytics="mark-water-open"
               className="shrink-0 rounded-full border border-[#40573d] px-4 py-2 text-xs text-[#9fb77b] transition-colors hover:bg-[#142018] hover:text-[#c8d8b8]"
             >
               mark the water
@@ -215,6 +216,13 @@ export default function HistoryPage() {
               complete your first frog<br />
               and it will appear here.
             </p>
+            <Link
+              href="/"
+              data-analytics="history-empty-dump"
+              className="mt-7 rounded-full border border-[#40573d] px-4 py-2 text-sm text-[#a8bd96] transition-colors hover:bg-[#40573d] hover:text-[#d6e3ca]"
+            >
+              dump your tasks
+            </Link>
           </div>
         )}
 
@@ -248,6 +256,7 @@ export default function HistoryPage() {
               <button
                 type="button"
                 onClick={() => setFrogToHide(item)}
+                data-analytics="hide-frog-open"
                 className="absolute bottom-4 left-5 text-xs text-[#6f7f68] opacity-60 transition-all hover:text-[#b68f72] md:opacity-0 md:group-hover:opacity-100"
               >
                 let it sink
@@ -275,6 +284,7 @@ export default function HistoryPage() {
                 type="button"
                 onClick={() => setFrogToHide(null)}
                 disabled={deleting}
+                data-analytics="hide-frog-cancel"
                 className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] transition-colors hover:bg-[#142018] disabled:opacity-40"
               >
                 keep it here
@@ -283,6 +293,7 @@ export default function HistoryPage() {
                 type="button"
                 onClick={hideFrog}
                 disabled={deleting}
+                data-analytics="hide-frog-confirm"
                 className="rounded-xl bg-[#8fa66c] px-4 py-3 text-sm text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-95 disabled:opacity-40"
               >
                 {deleting ? 'sinking...' : 'let it sink'}
@@ -322,6 +333,7 @@ export default function HistoryPage() {
                 onClick={() => setMarkPanelOpen(false)}
                 disabled={savingMark}
                 aria-label="Close"
+                data-analytics="mark-water-close"
                 className="absolute right-4 top-4 rounded-full px-2 py-1 text-lg text-[#718067] transition-colors hover:text-[#c8d8b8] disabled:opacity-40 sm:right-6 sm:top-6"
               >
                 ×
@@ -365,6 +377,7 @@ export default function HistoryPage() {
                   type="button"
                   onClick={saveWaterContext}
                   disabled={!isMemoryContextSelection(waterContext) || savingMark}
+                  data-analytics="mark-water-save"
                   className="w-full rounded-[1rem_1.25rem_0.9rem_1.15rem] bg-[#71865f] px-6 py-3 text-sm font-medium text-[#0a1710] transition-colors hover:bg-[#82966f] disabled:opacity-30 sm:w-auto sm:min-w-56"
                 >
                   {savingMark ? 'remembering...' : 'mark this water'}

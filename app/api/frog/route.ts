@@ -239,7 +239,7 @@ let generationRepaired = false;
 
 if (isVague) {
   chosenTask = taskLines[0]?.trim() || "your task";
-  firstStep = "open your notes app and type whatever is sitting heaviest right now";
+  firstStep = "open a blank note titled exactly what this looks like";
 } else {
 
 const tasksToSend = taskLines.join("\n");

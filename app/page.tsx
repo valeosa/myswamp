@@ -236,6 +236,7 @@ export default function Home() {
           <button
             onClick={pickFrog}
             disabled={!isLoaded || !tasks.trim() || dumpIsTooLarge || loading || restoringFrog}
+            data-analytics="into-swamp"
             className="w-full py-3 swamp-button font-medium transition disabled:opacity-40"
           >
             {loading ? 'choosing your frog...' : 'into the swamp'}
@@ -266,6 +267,7 @@ export default function Home() {
               <button
                 onClick={() => settleFrog('frog_completed')}
                 disabled={loading}
+                data-analytics="frog-done"
                 className="py-4 rounded-2xl border border-lime-900/40 bg-[#07100b] text-[#b7c89b] font-semibold transition hover:bg-[#9fb77b] hover:text-[#10140c] disabled:opacity-40"
               >
                 done
@@ -273,6 +275,7 @@ export default function Home() {
               <button
                 onClick={() => settleFrog('frog_not_completed')}
                 disabled={loading}
+                data-analytics="frog-not-yet"
                 className="py-4 rounded-2xl border border-[#33452d]/50 text-[#9db286] transition-colors hover:bg-[#647b51] hover:text-[#10140c] disabled:opacity-40"
               >
                 not yet
@@ -283,8 +286,8 @@ export default function Home() {
         )}
 
         {pendingCount > 0 && (
-          <Link href="/current" className="block text-center text-sm text-[#8fa66c] opacity-80 transition-opacity hover:opacity-100">
-            {pendingCount === 1 ? 'one frog pending' : `${pendingCount} frogs pending`}
+          <Link href="/current" data-analytics="sunken-frogs-link" className="block text-center text-sm text-[#8fa66c] opacity-80 transition-opacity hover:opacity-100">
+            old frogs have sunk
           </Link>
         )}
 
@@ -294,7 +297,7 @@ export default function Home() {
             {hasMemory && (
               isSignedIn
                 ? <Link href="/history" className="opacity-70 transition-opacity hover:opacity-100">my water’s memory</Link>
-                : <button type="button" onClick={() => openSignUp()} className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
+                : <button type="button" onClick={() => openSignUp()} data-analytics="open-sign-up-memory" className="opacity-70 transition-opacity hover:opacity-100">the water’s memory</button>
             )}
           </nav>
         )}
