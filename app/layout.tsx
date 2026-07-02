@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import VisitorTracker from "./visitor-tracker";
 import { AccountMenu } from "./account-menu";
 import "./globals.css";
-
-
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "mySwamp",
@@ -55,9 +42,9 @@ export default function RootLayout({
  >
   <html
     lang="en"
-    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    className="h-full antialiased"
   >
-    <body className={geistSans.className}>
+    <body>
       <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
         <Show when="signed-out">
           <SignInButton>

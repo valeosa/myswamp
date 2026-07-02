@@ -122,14 +122,14 @@ export default function PreferencesPage() {
             <PreferenceToggle
               checked={preferences.deep_swamp_notifications}
               onChange={() => toggle('deep_swamp_notifications')}
-              title="Deep Swamp (Coming Soon)"
-              description="one message when Deep Swamp is ready"
+              title="deep swamp note"
+              description="one message when Deep Swamp observations are ready"
             />
             <PreferenceToggle
               checked={preferences.deep_swamp_analysis}
               onChange={() => toggle('deep_swamp_analysis')}
-              title="Deeep Swamp analysis (Beta)"
-              description="use my frog and tadpole inputs to find personal productivity patterns"
+              title="deep swamp data"
+              description="save extra frog and tadpole context for future observations"
             />
             <PreferenceToggle
               checked={preferences.feedback_contact}
