@@ -8,7 +8,7 @@ import { getLocalContext } from '@/lib/local-context'
 const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
 const RELIEF_DURATION_MS = 2_600
-const RAW_DUMP_PLACEHOLDER = 'tapheretostartdumpingyourtasks,findmyredsocksandgetdressed,replymydadsmessages,ironmywrinkledtrousers,bringoutthechickentodefrost,putthegroceriesback...'
+const RAW_DUMP_PLACEHOLDER = 'tapheretostartdumpingyourtasks,findmyredsocksandgetdressed,replymydadsmessages,ironmywrinkledtrousers,returnmyamazonpackage,foldlaundry.....'
 const LOCAL_FROG_MEMORY_KEY = 'localFrogMemory'
 const LOCAL_CURRENT_FROG_KEY = 'localCurrentFrog'
 
