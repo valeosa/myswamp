@@ -306,7 +306,7 @@ a[data-analytics]:hover {
 }
 
 .home-swamp {
-  --dump-size: clamp(3.2rem, min(7.2vw, calc((100dvh - 8rem) / 6.12)), 7.45rem);
+   --dump-size: clamp(4.25rem, calc((100dvh - 8rem) / 6.12), 7.45rem);
   --dump-line: 0.78;
   --dump-x-scale: 1;
   --dump-color: rgba(242, 225, 196, 0.48);
@@ -667,7 +667,7 @@ a[data-analytics]:hover {
 .home-swamp .dump-placeholder,
 .home-swamp .dump-textarea,
 .home-swamp .dump-clearing-text {
-  height: min(calc(100dvh - 11rem), calc(var(--dump-size) * var(--dump-line) * 6.96 + 1.5rem));
+  height: min(calc(100dvh - 8.15rem), calc(var(--dump-size) * var(--dump-line) * 6.96 + 1.5rem));
 }
 
 .home-count {
@@ -1513,7 +1513,7 @@ a[data-analytics]:hover {
   }
 
   .dump-stage {
-    padding-top: 4.08rem;
+   
   }
 }
 
@@ -1741,14 +1741,14 @@ a[data-analytics]:hover {
 @media (max-width: 760px) {
   .home-swamp {
    --dump-size: clamp(4rem, min(16vw, calc((100dvh - 8.4rem) / 6.32)), 6.35rem);
-    --dump-line: 0.78;
-    --dump-x-scale: 1;
-  }
+  --dump-line: 0.78;
+  --dump-x-scale: 1;
+}
 
  .dump-stage {
   display: block;
   height: 100svh;
-  overflow: hidden;
+  
   padding: 4.42rem 1rem 4.2rem;
 }
 
@@ -1763,15 +1763,15 @@ a[data-analytics]:hover {
   transform: none;
 }
   
-  .home-swamp .dump-placeholder,
+
+.home-swamp .dump-placeholder,
 .home-swamp .dump-textarea,
 .home-swamp .dump-clearing-text {
   height: 100%;
   max-height: 100%;
 }
 
-.dump-placeholder-raw {
-  text-decoration: none;
+
 }
 
   .home-alert,
@@ -1896,7 +1896,7 @@ a[data-analytics]:hover {
     min-height: 2.75rem;
     font-size: 0.95rem;
   }
-}
+
 
 @media (prefers-reduced-motion: reduce) {
   .dump-cursor,
