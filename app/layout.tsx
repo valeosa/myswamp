@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { ClerkProvider, Show, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import VisitorTracker from "./visitor-tracker";
-import { AccountMenu } from "./account-menu";
+import { AuthShell } from "./auth-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 
@@ -34,58 +34,94 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body>
         <ClerkProvider
+          localization={{
+            dividerText: 'or',
+            socialButtonsBlockButton: 'continue with {{provider|titleize}}',
+            formFieldLabel__emailAddress: 'email address',
+            formFieldLabel__password: 'password',
+            formFieldInputPlaceholder__emailAddress: 'your email address',
+            formFieldInputPlaceholder__password: 'your password',
+            formFieldInputPlaceholder__signUpPassword: 'make a password',
+            formButtonPrimary: 'continue',
+            signIn: {
+              start: {
+                title: 'return to the swamp',
+                subtitle: 'let the water remember your frogs.',
+                actionText: 'new here?',
+                actionLink: 'sign up',
+              },
+              password: {
+                title: 'return to the swamp',
+                subtitle: 'one quiet step back in.',
+                actionLink: 'use another way',
+              },
+            },
+            signUp: {
+              start: {
+                title: 'enter the swamp',
+                subtitle: 'make a place for your frogs to return to.',
+                actionText: 'already here?',
+                actionLink: 'sign in',
+              },
+              continue: {
+                title: 'enter the swamp',
+                subtitle: 'one more mark in the water.',
+                actionText: 'already here?',
+                actionLink: 'sign in',
+              },
+            },
+          }}
           appearance={{
             variables: {
-              colorPrimary: '#8fa66c',
+              fontFamily: 'Oranienbaum, ui-serif, Georgia, serif',
+              colorPrimary: 'rgba(242, 225, 196, 0.82)',
               colorBackground: '#0b1710',
-              colorForeground: '#c8d8b8',
-              colorNeutral: '#8fa66c',
+              colorForeground: 'rgba(242, 225, 196, 0.82)',
+              colorNeutral: 'rgba(242, 225, 196, 0.62)',
               colorPrimaryForeground: '#07100b',
               colorInput: '#09140d',
-              colorInputForeground: '#c8d8b8',
+              colorInputForeground: 'rgba(242, 225, 196, 0.82)',
               colorMuted: '#102117',
-              colorMutedForeground: '#8fa080',
-              colorBorder: '#29422f',
-              colorRing: '#8fa66c',
-              colorShimmer: 'rgba(143, 166, 108, 0.28)',
-              borderRadius: '0.85rem',
+              colorMutedForeground: 'rgba(242, 225, 196, 0.5)',
+              colorBorder: 'rgba(242, 225, 196, 0.34)',
+              colorRing: 'rgba(242, 225, 196, 0.58)',
+              colorShimmer: 'rgba(242, 225, 196, 0.24)',
+              borderRadius: '0',
             },
             elements: {
-              cardBox: { boxShadow: 'none' },
-              card: { border: '1px solid #29422f', boxShadow: 'none' },
+              avatarBox: {
+                background: 'rgba(242, 225, 196, 0.76)',
+                color: 'transparent',
+              },
+              cardBox: { boxShadow: 'none', background: 'transparent' },
+              card: {
+                border: '0',
+                background: 'transparent',
+                boxShadow: 'none',
+              },
               formButtonPrimary: {
-                backgroundColor: '#8fa66c',
-                color: '#07100b',
+                backgroundColor: 'transparent',
+                color: 'rgba(242, 225, 196, 0.82)',
+                border: '1px solid rgba(242, 225, 196, 0.46)',
+                borderRadius: '0',
                 boxShadow: 'none',
               },
               socialButtonsBlockButton: {
-                borderColor: '#29422f',
-                color: '#c8d8b8',
+                borderColor: 'rgba(242, 225, 196, 0.34)',
+                borderRadius: '0',
+                color: 'rgba(242, 225, 196, 0.78)',
                 boxShadow: 'none',
               },
-              footerActionLink: { color: '#9fb77b' },
-              footer: { background: '#09140d' },
+              footerActionLink: { color: 'rgba(242, 225, 196, 0.8)' },
+              footer: { background: 'transparent' },
             },
           }}
         >
-          <header className="fixed top-0 right-0 z-50 flex justify-end items-center p-4 gap-4 h-16">
-            <Show when="signed-out">
-              <SignInButton mode="modal">
-                <button data-analytics="auth-sign-in" className="h-10 px-3 rounded-full text-sm text-[#c8d8b8] cursor-pointer transition-colors duration-200 hover:bg-[#17251b] hover:text-[#d6e3ca]">
-                  sign in
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button data-analytics="auth-sign-up" className="bg-[#8fa66c] text-[#0a1710] rounded-full font-medium text-sm h-10 px-4 cursor-pointer transition-all duration-200 hover:bg-[#b2c791] hover:scale-[1.03] active:scale-95">
-                  sign up
-                </button>
-              </SignUpButton>
-            </Show>
+          <AuthShell />
 
-            <Show when="signed-in">
-              <AccountMenu />
-            </Show>
-          </header>
+          <div className="water-glints global-water-glints" aria-hidden="true">
+            {Array.from({ length: 96 }).map((_, index) => <span key={index} />)}
+          </div>
 
           {children}
           <VisitorTracker />

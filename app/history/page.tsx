@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { getDisplayFrog, getTadpoles } from '@/lib/tasks'
 import { LilyIcon } from '@/app/lily-icon'
-import { SwampScenery } from '@/app/swamp-scenery'
+import { LotusIcon } from '@/app/lotus-icon'
 import {
   isMemoryContextSelection,
   MAX_ERA_NAME_LENGTH,
@@ -26,6 +26,7 @@ type Frog = {
 }
 
 const HIDDEN_FROGS_KEY = 'hiddenFrogIds'
+const LOCAL_FROG_MEMORY_KEY = 'localFrogMemory'
 const memorySections: Array<{
   key: keyof MemoryContextSelection
   label: string
@@ -42,6 +43,23 @@ function locallyHiddenFrogs() {
     return new Set<string>(JSON.parse(localStorage.getItem(HIDDEN_FROGS_KEY) ?? '[]'))
   } catch {
     return new Set<string>()
+  }
+}
+
+function localFrogMemory() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LOCAL_FROG_MEMORY_KEY) ?? '[]')
+    return Array.isArray(stored) ? stored.filter((frog): frog is Frog => {
+      return Boolean(
+        frog
+        && typeof frog.id === 'string'
+        && typeof frog.task_dump === 'string'
+        && typeof frog.frog === 'string'
+        && typeof frog.created_at === 'string',
+      )
+    }) : []
+  } catch {
+    return []
   }
 }
 
@@ -85,7 +103,15 @@ export default function HistoryPage() {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'The water’s memory is cloudy right now.')
         const hidden = locallyHiddenFrogs()
-        setFrogs((data.frogs ?? []).filter((frog: Frog) => !hidden.has(frog.id)))
+        const local = localFrogMemory()
+        const server = (data.frogs ?? []) as Frog[]
+        const seen = new Set<string>()
+        const remembered = [...local, ...server].filter((frog) => {
+          if (hidden.has(frog.id) || seen.has(frog.id)) return false
+          seen.add(frog.id)
+          return true
+        })
+        setFrogs(remembered)
 
         const contextResponse = await fetch('/api/memory-contexts')
         if (contextResponse.ok) {
@@ -93,7 +119,13 @@ export default function HistoryPage() {
           setCurrentEraName(contextData.context?.era_name ?? '')
         }
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : 'The water’s memory is cloudy right now.')
+        if (process.env.NODE_ENV !== 'production') {
+          const hidden = locallyHiddenFrogs()
+          setFrogs(localFrogMemory().filter((frog) => !hidden.has(frog.id)))
+          setError('')
+        } else {
+          setError(reason instanceof Error ? reason.message : 'The water’s memory is cloudy right now.')
+        }
       } finally {
         setLoading(false)
       }
@@ -164,6 +196,17 @@ export default function HistoryPage() {
       setWaterMessage('the water remembers.')
       window.setTimeout(() => setWaterMessage(''), 2800)
     } catch (reason) {
+      if (process.env.NODE_ENV !== 'production') {
+        const localEraName = eraName.trim()
+        setWaterContext({})
+        setEraName('')
+        setCurrentEraName(localEraName)
+        setMarkPanelOpen(false)
+        setWaterMessage('the water remembers.')
+        window.setTimeout(() => setWaterMessage(''), 2800)
+        return
+      }
+
       setMarkError(reason instanceof Error ? reason.message : 'The water could not hold that mark.')
     } finally {
       setSavingMark(false)
@@ -171,55 +214,48 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 font-sans text-[#c8d8b8]">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <nav aria-label="Memory navigation" className="flex items-center gap-5 text-sm text-[#8fa66c]">
-          <Link href="/" className="inline-flex items-center gap-2 opacity-70 transition-opacity hover:opacity-100">
+    <main className="secondary-swamp page-surface min-h-screen p-6 pb-16 pt-24 text-[#c8d8b8]">
+      <div className="secondary-swamp-shell secondary-memory-shell space-y-6">
+        <nav aria-label="Memory navigation" className="secondary-nav">
+          <Link href="/" className="secondary-nav-link secondary-nav-back">
             <LilyIcon /> {!isSignedIn || (!loading && frogs.length === 0) ? 'back' : 'back to swamp'}
           </Link>
-          {isSignedIn && <Link href="/current" className="opacity-70 transition-opacity hover:opacity-100">currently</Link>}
+          {isSignedIn && <Link href="/current" className="secondary-nav-link">currently</Link>}
         </nav>
 
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-[#c8d8b8]">the water’s memory</h1>
-          </div>
+        <div className="memory-heading-row">
+          <h1 className="secondary-title">the water’s memory</h1>
           {isLoaded && (
             <button
               type="button"
               onClick={openMarkPanel}
               data-analytics="mark-water-open"
-              className="shrink-0 rounded-full border border-[#40573d] px-4 py-2 text-xs text-[#9fb77b] transition-colors hover:bg-[#142018] hover:text-[#c8d8b8]"
+              className="mark-water-open-button"
             >
               mark the water
             </button>
           )}
         </div>
 
-        {waterMessage && <p role="status" className="water-whisper text-sm italic text-[#8fa66c]">{waterMessage}</p>}
+        {waterMessage && <p role="status" className="water-whisper secondary-muted">{waterMessage}</p>}
         {currentEraName && (
-          <p className="text-sm text-[#8fa66c]">{currentEraName}</p>
+          <p className="secondary-muted">{currentEraName}</p>
         )}
 
-        {loading && isSignedIn && <p className="text-[#8fa66c]">looking beneath the surface...</p>}
-        {isLoaded && !isSignedIn && <p className="text-[#8fa66c]">sign in, and the swamp will remember.</p>}
-        {error && <p role="alert" className="rounded-xl border border-[#6e4f3d] bg-[#241710] p-3 text-sm text-[#e2c2a8]">{error}</p>}
-        {!loading && isSignedIn && !error && frogs.length === 0 && (
-          <div className="flex min-h-[28rem] flex-col items-center justify-center pb-12 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#294532] text-[#78957c]">
-              <svg aria-hidden="true" viewBox="0 0 32 40" className="h-8 w-8 fill-none stroke-current" strokeWidth="2.5">
-                <path d="M16 2.5C12.6 7.6 5 14.5 5 23.1 5 30.8 9.9 36 16 36s11-5.2 11-12.9C27 14.5 19.4 7.6 16 2.5Z" />
-              </svg>
-            </div>
-            <p className="mt-6 text-xl font-medium text-[#78957c]">nothing yet.</p>
-            <p className="mt-5 text-base italic leading-relaxed text-[#718b75]">
+        {loading && isSignedIn && <p className="secondary-muted">looking beneath the surface...</p>}
+        {isLoaded && !isSignedIn && <p className="secondary-muted">sign in, and the swamp will remember.</p>}
+        {error && <p role="alert" className="secondary-alert">{error}</p>}
+        {!loading && isLoaded && !error && frogs.length === 0 && (
+          <div className="secondary-empty-state">
+            <p>nothing yet.</p>
+            <p className="mt-5 text-lg italic leading-relaxed text-[rgba(242,225,196,0.54)]">
               complete your first frog<br />
               and it will appear here.
             </p>
             <Link
               href="/"
               data-analytics="history-empty-dump"
-              className="mt-7 rounded-full border border-[#40573d] px-4 py-2 text-sm text-[#a8bd96] transition-colors hover:bg-[#40573d] hover:text-[#d6e3ca]"
+              className="secondary-box-link mt-7"
             >
               dump your tasks
             </Link>
@@ -231,22 +267,22 @@ export default function HistoryPage() {
           const displayFrog = getDisplayFrog(item.task_dump, item.chosen_task, item.frog)
 
           return (
-            <article key={item.id} className="mist-reveal group relative space-y-3 rounded-2xl border border-lime-900/40 bg-[#0b1710] p-5 pb-12 transition-colors hover:border-[#38522e]">
+            <article key={item.id} className="history-frog-card mist-reveal group relative space-y-3">
               <div>
-                <p className="text-[#8fa66c] text-sm">frog</p>
-                <p className="text-[#c8d8b8]">{displayFrog}</p>
+                <p className="secondary-muted">frog</p>
+                <p className="text-xl text-[rgba(242,225,196,0.82)]">{displayFrog}</p>
               </div>
 
               {displayFrog !== item.frog && (
                 <details className="lily-details text-sm text-[#b7c9aa]">
-                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />your one small action</summary>
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[rgba(242,225,196,0.56)] transition-colors hover:text-[rgba(242,225,196,0.82)]"><LotusIcon />your one small action</summary>
                   <p className="mt-2 pl-4">{item.frog}</p>
                 </details>
               )}
 
               {tadpoles.length > 0 && (
                 <details className="lily-details text-sm text-[#aab5a2]">
-                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[#718067] transition-colors hover:text-[#a7b69a]"><LilyIcon />tadpoles</summary>
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[rgba(242,225,196,0.56)] transition-colors hover:text-[rgba(242,225,196,0.82)]"><LotusIcon />tadpoles</summary>
                   <ul className="mt-2 pl-4 space-y-1">
                     {tadpoles.map((tadpole, index) => <li key={`${tadpole}-${index}`}>{tadpole}</li>)}
                   </ul>
@@ -257,7 +293,7 @@ export default function HistoryPage() {
                 type="button"
                 onClick={() => setFrogToHide(item)}
                 data-analytics="hide-frog-open"
-                className="absolute bottom-4 left-5 text-xs text-[#6f7f68] opacity-60 transition-all hover:text-[#b68f72] md:opacity-0 md:group-hover:opacity-100"
+                className="memory-sink-button absolute bottom-4 left-5 text-sm text-[rgba(242,225,196,0.42)] opacity-60 transition-all hover:text-[rgba(242,225,196,0.72)] md:opacity-0 md:group-hover:opacity-100"
               >
                 let it sink
               </button>
@@ -265,7 +301,7 @@ export default function HistoryPage() {
               <time
                 dateTime={item.created_at}
                 suppressHydrationWarning
-                className="absolute bottom-4 right-5 text-xs text-[#60705a]"
+                className="absolute bottom-4 right-5 text-sm text-[rgba(242,225,196,0.4)]"
               >
                 {readableDate(item.created_at)}
               </time>
@@ -276,16 +312,16 @@ export default function HistoryPage() {
 
       {frogToHide && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-6" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="w-full max-w-sm rounded-2xl border border-[#3f5437] bg-[#0b1710] p-6">
-            <h2 id="hide-frog-title" className="text-lg text-[#c8d8b8]">let this frog sink?</h2>
-            <p className="mt-3 text-sm leading-6 text-[#8fa087]">the swamp still remembers, but it won’t be displayed here.</p>
+          <div role="dialog" aria-modal="true" aria-labelledby="hide-frog-title" className="secondary-dialog-card w-full max-w-sm p-6">
+            <h2 id="hide-frog-title" className="text-lg text-[rgba(242,225,196,0.82)]">let this frog sink?</h2>
+            <p className="mt-3 text-base leading-6 text-[rgba(242,225,196,0.62)]">the swamp still remembers, but it won’t be displayed here.</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setFrogToHide(null)}
                 disabled={deleting}
                 data-analytics="hide-frog-cancel"
-                className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] transition-colors hover:bg-[#142018] disabled:opacity-40"
+                className="secondary-box-link px-4 py-3 text-sm disabled:opacity-40"
               >
                 keep it here
               </button>
@@ -294,7 +330,7 @@ export default function HistoryPage() {
                 onClick={hideFrog}
                 disabled={deleting}
                 data-analytics="hide-frog-confirm"
-                className="rounded-xl bg-[#8fa66c] px-4 py-3 text-sm text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-95 disabled:opacity-40"
+                className="secondary-box-link px-4 py-3 text-sm disabled:opacity-40"
               >
                 {deleting ? 'sinking...' : 'let it sink'}
               </button>
@@ -305,18 +341,16 @@ export default function HistoryPage() {
       )}
 
       {markPanelOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 sm:p-6" role="presentation">
+        <div className="mark-water-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="presentation">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="mark-water-title"
-            className="relative max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-y-auto rounded-[1.4rem_1.8rem_1.25rem_1.65rem] border border-[#29422f] bg-[#09140d] shadow-[0_18px_60px_rgba(0,0,0,0.42)]"
+            className="mark-water-card relative max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-y-auto"
           >
-            <SwampScenery variant="memory" />
-
             <div className="relative z-10 p-5 sm:p-7">
-              <div className="flex flex-wrap items-center gap-3 pr-10 sm:gap-5">
-                <h2 id="mark-water-title" className="shrink-0 text-xl font-medium text-[#c8d8b8]">mark the water</h2>
+              <div className="mark-water-heading-row flex flex-wrap items-center gap-3 pr-10 sm:gap-5">
+                <h2 id="mark-water-title" className="shrink-0 text-2xl font-medium text-[rgba(242,225,196,0.82)]">mark the water</h2>
                 <input
                   id="era-name"
                   type="text"
@@ -325,7 +359,7 @@ export default function HistoryPage() {
                   maxLength={MAX_ERA_NAME_LENGTH}
                   aria-label="Optionally name this era"
                   placeholder="what’s happening beneath the surface? optionally name this era."
-                  className="min-w-0 flex-1 basis-72 rounded-xl border border-[#263e2d] bg-[#0b1710]/90 px-3.5 py-2 text-sm text-[#c8d8b8] outline-none placeholder:text-[#5f7061] focus:border-[#38563d]"
+                  className="mark-water-input min-w-0 flex-1 basis-72 px-3.5 py-2 text-base outline-none"
                 />
               </div>
               <button
@@ -334,15 +368,15 @@ export default function HistoryPage() {
                 disabled={savingMark}
                 aria-label="Close"
                 data-analytics="mark-water-close"
-                className="absolute right-4 top-4 rounded-full px-2 py-1 text-lg text-[#718067] transition-colors hover:text-[#c8d8b8] disabled:opacity-40 sm:right-6 sm:top-6"
+                className="mark-water-close-button absolute right-4 top-4 px-2 py-1 text-xl disabled:opacity-40 sm:right-6 sm:top-6"
               >
                 ×
               </button>
 
-              <div className="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">
+              <div className="mark-water-grid mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {memorySections.map((section) => (
                 <section key={section.key} aria-labelledby={`water-${section.key}`}>
-                  <h3 id={`water-${section.key}`} className="text-sm text-[#718067]">
+                  <h3 id={`water-${section.key}`} className="mark-water-section-label">
                     {section.label}
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-labelledby={`water-${section.key}`}>
@@ -355,11 +389,7 @@ export default function HistoryPage() {
                           role="radio"
                           aria-checked={selected}
                           onClick={() => setWaterContext((current) => ({ ...current, [section.key]: option }))}
-                          className={`water-choice rounded-full border px-3.5 py-2 text-sm transition-all ${
-                            selected
-                              ? 'water-choice-selected border-[#456047] bg-[#273827] text-[#c7d2bd]'
-                              : 'border-[#30442f] bg-[#0d1b12] text-[#9eaa94] hover:border-[#526b49] hover:text-[#c8d8b8]'
-                          }`}
+                          className={`water-choice ${selected ? 'water-choice-selected' : ''}`}
                         >
                           {option}
                         </button>
@@ -370,7 +400,7 @@ export default function HistoryPage() {
               ))}
               </div>
 
-              {markError && <p role="alert" className="mt-5 text-sm text-[#e2c2a8]">{markError}</p>}
+              {markError && <p role="alert" className="secondary-alert mark-water-error">{markError}</p>}
 
               <div className="mt-6 flex justify-end">
                 <button
@@ -378,7 +408,7 @@ export default function HistoryPage() {
                   onClick={saveWaterContext}
                   disabled={!isMemoryContextSelection(waterContext) || savingMark}
                   data-analytics="mark-water-save"
-                  className="w-full rounded-[1rem_1.25rem_0.9rem_1.15rem] bg-[#71865f] px-6 py-3 text-sm font-medium text-[#0a1710] transition-colors hover:bg-[#82966f] disabled:opacity-30 sm:w-auto sm:min-w-56"
+                  className="mark-water-save-button w-full px-6 py-3 text-base font-medium disabled:opacity-30 sm:w-auto sm:min-w-56"
                 >
                   {savingMark ? 'remembering...' : 'mark this water'}
                 </button>

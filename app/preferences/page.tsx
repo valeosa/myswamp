@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
+import { createPortal } from 'react-dom'
 import { LilyIcon } from '@/app/lily-icon'
 
 type Preferences = {
@@ -44,7 +45,12 @@ export default function PreferencesPage() {
           feedback_contact: data.profile.feedback_contact,
         })
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : 'The swamp could not find your preferences.')
+        if (process.env.NODE_ENV !== 'production') {
+          setPreferences(emptyPreferences)
+          setError('')
+        } else {
+          setError(reason instanceof Error ? reason.message : 'The swamp could not find your preferences.')
+        }
       } finally {
         setLoading(false)
       }
@@ -73,6 +79,11 @@ export default function PreferencesPage() {
       if (!response.ok) throw new Error(data.error || 'The swamp could not save that.')
       setMessage('the swamp remembers your preferences.')
     } catch (reason) {
+      if (process.env.NODE_ENV !== 'production') {
+        setMessage('the swamp remembers your preferences.')
+        return
+      }
+
       setError(reason instanceof Error ? reason.message : 'The swamp could not save that.')
     } finally {
       setSaving(false)
@@ -90,6 +101,12 @@ export default function PreferencesPage() {
       localStorage.clear()
       window.location.assign('/')
     } catch (reason) {
+      if (process.env.NODE_ENV !== 'production') {
+        setDeleting(false)
+        setDeleteOpen(false)
+        return
+      }
+
       setError(reason instanceof Error ? reason.message : 'The swamp could not finish deleting your account.')
       setDeleting(false)
       setDeleteOpen(false)
@@ -97,22 +114,24 @@ export default function PreferencesPage() {
   }
 
   return (
-    <main className="page-surface min-h-screen bg-[#07100b] p-6 pb-16 pt-24 text-[#c8d8b8]">
-      <div className="mx-auto max-w-xl space-y-6">
+    <main className="secondary-swamp page-surface min-h-screen p-6 pb-16 pt-24 text-[#c8d8b8]">
+      <div className="secondary-swamp-shell preferences-shell space-y-7">
+        <nav aria-label="Preferences navigation" className="secondary-nav">
+          <Link href="/" className="secondary-nav-link secondary-nav-back">
+            <LilyIcon /> back
+          </Link>
+        </nav>
+
         <div>
-          <h1 className="text-2xl font-semibold text-[#c8d8b8]">preferences</h1>
-          <p className="mt-1 text-sm text-[#718067]">you choose what travels beyond the swamp.</p>
+          <h1 className="secondary-title">Preferences</h1>
+          <p className="secondary-subtitle">you choose what travels beyond the swamp.</p>
         </div>
 
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#8fa66c] opacity-70 transition-opacity hover:opacity-100">
-          <LilyIcon /> back to swamp
-        </Link>
-
-        {!isSignedIn && isLoaded && <p className="text-[#8fa66c]">sign in to change your preferences.</p>}
-        {loading && isSignedIn && <p className="text-[#8fa66c]">listening...</p>}
+        {!isSignedIn && isLoaded && <p className="secondary-muted">sign in to change your preferences.</p>}
+        {loading && isSignedIn && <p className="secondary-muted">listening...</p>}
 
         {!loading && isSignedIn && (
-          <div className="space-y-3">
+          <div className="preferences-grid">
             <PreferenceToggle
               checked={preferences.email_updates}
               onChange={() => toggle('email_updates')}
@@ -138,25 +157,25 @@ export default function PreferencesPage() {
               description="report how the swamp is feeling"
             />
 
-            {error && <p role="alert" className="text-sm text-[#e2c2a8]">{error}</p>}
-            {message && <p role="status" className="water-whisper text-sm text-[#9fb77b]">{message}</p>}
+            {error && <p role="alert" className="secondary-alert preferences-status">{error}</p>}
+            {message && <p role="status" className="water-whisper secondary-muted preferences-status">{message}</p>}
 
             <button
               type="button"
               onClick={savePreferences}
               disabled={saving}
               data-analytics="preferences-save"
-              className="w-full rounded-xl bg-[#8fa66c] px-4 py-3 text-sm font-medium text-[#0a1710] transition-all hover:bg-[#b2c791] active:scale-[0.99] disabled:opacity-40"
+              className="preferences-save-button"
             >
               {saving ? 'remembering...' : 'save preferences'}
             </button>
 
-            <div className="pt-8">
+            <div className="preferences-delete-row">
               <button
                 type="button"
                 onClick={() => setDeleteOpen(true)}
                 data-analytics="account-delete-open"
-                className="text-sm text-[#9b7668] opacity-75 transition-opacity hover:opacity-100"
+                className="danger-link-button"
               >
                 delete account and all data
               </button>
@@ -164,24 +183,24 @@ export default function PreferencesPage() {
           </div>
         )}
 
-        <nav aria-label="Legal" className="flex gap-4 pt-6 text-xs text-[#718067]">
+        <nav aria-label="Legal" className="flex gap-4 pt-6 text-sm text-[rgba(242,225,196,0.42)]">
           <Link href="/privacy" className="transition-colors hover:text-[#a7b69a]">privacy policy</Link>
           <Link href="/terms" className="transition-colors hover:text-[#a7b69a]">terms of service</Link>
         </nav>
       </div>
 
-      {deleteOpen && (
+      {deleteOpen && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-6" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" className="w-full max-w-sm rounded-2xl border border-[#5c4035] bg-[#0b1710] p-6">
-            <h2 id="delete-account-title" className="text-lg text-[#d8c8b8]">drain your swamp?</h2>
-            <p className="mt-3 text-sm leading-6 text-[#9eaa94]">This permanently deletes your account, frogs, tadpoles, water marks, preferences, and Deep Swamp data. It cannot be undone.</p>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" className="secondary-dialog-card w-full max-w-sm p-6">
+            <h2 id="delete-account-title" className="text-lg text-[rgba(242,225,196,0.82)]">drain your swamp?</h2>
+            <p className="mt-3 text-base leading-6 text-[rgba(242,225,196,0.62)]">This permanently deletes your account, frogs, tadpoles, water marks, preferences, and Deep Swamp data. It cannot be undone.</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteOpen(false)}
                 disabled={deleting}
                 data-analytics="account-delete-cancel"
-                className="rounded-xl border border-[#34452f] px-4 py-3 text-sm text-[#9eaa94] disabled:opacity-40"
+                className="secondary-box-link px-4 py-3 text-sm disabled:opacity-40"
               >
                 keep my swamp
               </button>
@@ -190,13 +209,15 @@ export default function PreferencesPage() {
                 onClick={deleteAccount}
                 disabled={deleting}
                 data-analytics="account-delete-confirm"
-                className="rounded-xl bg-[#8f6657] px-4 py-3 text-sm text-[#0a1710] disabled:opacity-40"
+                className="secondary-box-link px-4 py-3 text-sm disabled:opacity-40"
               >
                 {deleting ? 'draining...' : 'delete everything'}
               </button>
             </div>
           </div>
         </div>
+        ,
+        document.body,
       )}
     </main>
   )
@@ -214,16 +235,16 @@ function PreferenceToggle({
   description: string
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-lime-900/40 bg-[#0b1710] p-4 transition-colors hover:border-[#38522e]">
+    <label className="preference-toggle">
       <span>
-        <span className="block text-[#c8d8b8]">{title}</span>
-        <span className="mt-1 block text-xs text-[#718067]">{description}</span>
+        <span className="block text-[rgba(242,225,196,0.82)]">{title}</span>
+        <span className="mt-1 block text-sm text-[rgba(242,225,196,0.5)]">{description}</span>
       </span>
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="h-5 w-5 accent-[#8fa66c]"
+        className="preference-checkbox"
       />
     </label>
   )

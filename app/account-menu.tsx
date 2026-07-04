@@ -7,40 +7,56 @@ export function AccountMenu() {
   const { user, isLoaded } = useUser()
 
   return (
-    <div className="relative h-10 w-10">
+    <div className={`account-menu-avatar relative h-10 w-10 ${isLoaded && user && !user.hasImage ? 'account-menu-avatar-blank-state' : ''}`}>
       <UserButton
         appearance={{
           variables: {
-            colorPrimary: '#8fa66c',
+            fontFamily: 'Oranienbaum, ui-serif, Georgia, serif',
+            colorPrimary: 'rgba(242, 225, 196, 0.82)',
             colorBackground: '#0b1710',
-            colorForeground: '#c8d8b8',
-            colorNeutral: '#8fa66c',
+            colorForeground: 'rgba(242, 225, 196, 0.82)',
+            colorNeutral: 'rgba(242, 225, 196, 0.62)',
             colorPrimaryForeground: '#07100b',
             colorInput: '#09140d',
-            colorInputForeground: '#c8d8b8',
+            colorInputForeground: 'rgba(242, 225, 196, 0.82)',
             colorMuted: '#102117',
-            colorMutedForeground: '#8fa080',
-            colorBorder: '#29422f',
-            colorRing: '#8fa66c',
-            colorShimmer: 'rgba(143, 166, 108, 0.28)',
+            colorMutedForeground: 'rgba(242, 225, 196, 0.5)',
+            colorBorder: 'rgba(242, 225, 196, 0.34)',
+            colorRing: 'rgba(242, 225, 196, 0.58)',
+            colorShimmer: 'rgba(242, 225, 196, 0.24)',
+            borderRadius: '0',
           },
           elements: {
+            avatarBox: {
+              background: 'rgba(242, 225, 196, 0.76)',
+              color: 'transparent',
+            },
             userButtonAvatarBox: { width: '2.5rem', height: '2.5rem' },
-            userButtonPopoverCard: {
-              background: '#0b1710',
-              border: '1px solid #29422f',
+            userPreviewAvatarBox: {
+              background: 'rgba(242, 225, 196, 0.78)',
+              color: 'transparent',
+              borderRadius: '0',
               boxShadow: 'none',
             },
-            userButtonPopoverActionButton: { color: '#c8d8b8' },
-            userButtonPopoverActionButtonText: { color: '#c8d8b8' },
-            userButtonPopoverFooter: { background: '#09140d' },
+            userButtonPopoverCard: {
+              background: 'rgba(6, 13, 8, 0.96)',
+              border: '1px solid rgba(242, 225, 196, 0.34)',
+              borderRadius: '0',
+              boxShadow: 'none',
+            },
+            userButtonPopoverActionButton: {
+              color: 'rgba(242, 225, 196, 0.78)',
+              borderRadius: '0',
+            },
+            userButtonPopoverActionButtonText: { color: 'rgba(242, 225, 196, 0.78)' },
+            userButtonPopoverFooter: { background: 'transparent' },
           },
         }}
       >
         <UserButton.MenuItems>
           <UserButton.Link
             href="/preferences"
-            label="preferences"
+            label="Preferences"
             labelIcon={<LilyIcon className="h-3.5 w-4.5" />}
           />
         </UserButton.MenuItems>
@@ -49,11 +65,8 @@ export function AccountMenu() {
       {isLoaded && user && !user.hasImage && (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full border border-[#304634] bg-[#08110c]"
-        >
-          <span className="absolute left-2 top-1.5 h-5 w-5 rounded-full bg-[#c8d8b8] opacity-80 shadow-[0_0_14px_rgba(200,216,184,0.22)]" />
-          <span className="absolute left-3 top-1 h-5 w-5 rounded-full bg-[#08110c]" />
-        </div>
+          className="account-avatar-blank pointer-events-none absolute"
+        />
       )}
     </div>
   )

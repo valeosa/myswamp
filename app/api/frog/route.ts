@@ -7,7 +7,7 @@ import { getTadpoleItems, parseTasks, taskKey, tasksAreEquivalent } from "@/lib/
 import { getOrCreateAccount } from "@/lib/account";
 import { recordFounderEvents } from "@/lib/founder-analytics";
 import { parseLocalContext } from "@/lib/local-context";
-import { consumeFrogDailyQuota, frogBurstLimit, frogQuotaKey } from "@/lib/frog-quota";
+import { consumeFrogDailyQuota, frogBurstLimit, frogDailyLimit, frogQuotaKey } from "@/lib/frog-quota";
 
 const MAX_DUMP_LENGTH = 2_000;
 const MAX_TASKS = 25;
@@ -35,6 +35,30 @@ function normalizeChoice(choice: FrogChoice, taskLines: string[]) {
     && !/\band\b/i.test(firstStep);
 
   return { chosenTask, firstStep, validStep };
+}
+
+function deterministicFrogChoice(taskLines: string[]) {
+  const usableTasks = taskLines.map((task) => task.trim()).filter(Boolean);
+  const chosenTask = usableTasks[Math.floor(Math.random() * usableTasks.length)] || "your task";
+  const lower = chosenTask.toLowerCase();
+  let firstSteps = [
+    "write the first visible word for this task",
+    "open the place where this lives",
+    "touch the nearest object for this task",
+    "make the smallest visible mark",
+  ];
+
+  if (/\b(email|mail|inbox)\b/.test(lower)) firstSteps = ["open the email thread", "write one rough sentence"];
+  else if (/\bschool|class|essay|homework|assignment|notes?\b/.test(lower)) firstSteps = ["open the school document", "find the assignment page"];
+  else if (/\b(package|return|amazon|parcel)\b/.test(lower)) firstSteps = ["open the return page", "find the return label"];
+  else if (/\b(call|text|message|dm)\b/.test(lower)) firstSteps = ["open that person's message thread", "type the honest first sentence"];
+  else if (/\b(clean|room|laundry|dishes|kitchen|trash)\b/.test(lower)) firstSteps = ["move one visible item", "clear the nearest surface"];
+  else if (/\b(sight|vision|eye|appointment)\b/.test(lower)) firstSteps = ["open the appointment page", "find the clinic number"];
+  else if (/\b(water|grocery|groceries|supermarket|shop|store)\b/.test(lower)) firstSteps = ["open the shopping list", "find your bag"];
+
+  const firstStep = firstSteps[Math.floor(Math.random() * firstSteps.length)] ?? firstSteps[0];
+
+  return { chosenTask, firstStep };
 }
 
 const frogChoiceSchema = {
@@ -105,16 +129,19 @@ async function chooseFrog(req: Request) {
   const userAgent = req.headers.get("user-agent")?.slice(0, 240);
   const visitorKey = userId ?? `guest:${forwardedFor || "unknown"}`;
   const quotaScope = userId ? "signed_in" : "guest";
-  const rateLimit = checkRateLimit(`frog:${visitorKey}`, frogBurstLimit(quotaScope), 10 * 60 * 1000);
-  if (!rateLimit.allowed) {
-    const message = userId
-      ? "The swamp needs a moment. Try again soon."
-      : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
+  const hasQuotaStorage = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  if (userId || hasQuotaStorage) {
+    const rateLimit = checkRateLimit(`frog:${visitorKey}`, frogBurstLimit(quotaScope), 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      const message = userId
+        ? "The swamp needs a moment. Try again soon."
+        : "enjoying the swamp? create an account to keep your frogs, tadpoles, and memory.";
 
-    return Response.json(
-      { error: message, code: userId ? "frog_burst_limited" : "guest_quota_reached" },
-      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfter) } },
-    );
+      return Response.json(
+        { error: message, code: userId ? "frog_burst_limited" : "guest_quota_reached" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfter) } },
+      );
+    }
   }
 
   const body = await req.json();
@@ -186,11 +213,23 @@ async function chooseFrog(req: Request) {
     }
   }
 
-  const quota = await consumeFrogDailyQuota({
-    scope: quotaScope,
-    keyHash: frogQuotaKey({ userId, ip: forwardedFor, userAgent }),
-    accountId: account?.id ?? null,
-  });
+  let quota = {
+    allowed: true,
+    limit: frogDailyLimit(quotaScope),
+    remaining: Math.max(0, frogDailyLimit(quotaScope) - 1),
+    retryAfter: 24 * 60 * 60,
+  };
+
+  try {
+    quota = await consumeFrogDailyQuota({
+      scope: quotaScope,
+      keyHash: frogQuotaKey({ userId, ip: forwardedFor, userAgent }),
+      accountId: account?.id ?? null,
+    });
+  } catch (error) {
+    if (userId) throw error;
+    console.warn("guest frog quota fell back", error);
+  }
 
   const quotaHeaders = {
     "X-Frog-Daily-Limit": String(quota.limit),
@@ -218,31 +257,35 @@ async function chooseFrog(req: Request) {
     );
   }
 
-  const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    timeout: 10_000,
-    maxRetries: 1,
-  });
+  const isVague = taskLines.length > 0 && taskLines.every((t: string) =>
+    vaguePattern.test(t.trim())
+  );
 
-const isVague = taskLines.length > 0 && taskLines.every((t: string) => 
-  vaguePattern.test(t.trim())
-);
+  let chosenTask = "";
+  let firstStep = "";
+  let generationSource: "openai" | "deterministic" = "deterministic";
+  let generationPromptVersion = "vague-fallback-v1";
+  let generationModel: string | null = null;
+  let generationSystemFingerprint: string | null = null;
+  let generationResponseId: string | null = null;
+  let generationRepaired = false;
 
-let chosenTask = "";
-let firstStep = "";
-let generationSource: "openai" | "deterministic" = "deterministic";
-let generationPromptVersion = "vague-fallback-v1";
-let generationModel: string | null = null;
-let generationSystemFingerprint: string | null = null;
-let generationResponseId: string | null = null;
-let generationRepaired = false;
+  if (isVague) {
+    chosenTask = taskLines[0]?.trim() || "your task";
+    firstStep = "open a blank note titled exactly what this looks like";
+  } else if (!process.env.OPENAI_API_KEY) {
+    const fallback = deterministicFrogChoice(taskLines);
+    chosenTask = fallback.chosenTask;
+    firstStep = fallback.firstStep;
+    generationPromptVersion = "deterministic-no-openai-key-v1";
+  } else {
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 10_000,
+      maxRetries: 1,
+    });
 
-if (isVague) {
-  chosenTask = taskLines[0]?.trim() || "your task";
-  firstStep = "open a blank note titled exactly what this looks like";
-} else {
-
-const tasksToSend = taskLines.join("\n");
+    const tasksToSend = taskLines.join("\n");
 
   const systemPrompt = `
 
@@ -405,7 +448,8 @@ Now choose the frog for this task dump:
 ${tasksToSend}
 `;
 
-  const completion = await client.chat.completions.create({
+    try {
+      const completion = await client.chat.completions.create({
     model: FROG_MODEL,
     temperature: 0.2,
     max_completion_tokens: FROG_COMPLETION_MAX_TOKENS,
@@ -422,17 +466,17 @@ ${tasksToSend}
     ],
   });
 
-  const output = completion.choices[0].message.content?.trim() ?? "";
-  generationSource = "openai";
-  generationPromptVersion = FROG_PROMPT_VERSION;
-  generationModel = completion.model;
-  generationSystemFingerprint = completion.system_fingerprint ?? null;
-  generationResponseId = completion.id;
-  let parsed = JSON.parse(output) as FrogChoice;
-  let normalized = normalizeChoice(parsed, taskLines);
+      const output = completion.choices[0].message.content?.trim() ?? "";
+      generationSource = "openai";
+      generationPromptVersion = FROG_PROMPT_VERSION;
+      generationModel = completion.model;
+      generationSystemFingerprint = completion.system_fingerprint ?? null;
+      generationResponseId = completion.id;
+      let parsed = JSON.parse(output) as FrogChoice;
+      let normalized = normalizeChoice(parsed, taskLines);
 
-  if (!normalized.validStep) {
-    const repair = await client.chat.completions.create({
+      if (!normalized.validStep) {
+        const repair = await client.chat.completions.create({
       model: FROG_MODEL,
       temperature: 0,
       max_completion_tokens: FROG_COMPLETION_MAX_TOKENS,
@@ -448,17 +492,25 @@ ${tasksToSend}
         },
       ],
     });
-    parsed = JSON.parse(repair.choices[0].message.content ?? "") as FrogChoice;
-    generationRepaired = true;
-    generationModel = repair.model;
-    generationSystemFingerprint = repair.system_fingerprint ?? null;
-    generationResponseId = repair.id;
-    normalized = normalizeChoice({ ...parsed, chosen_task: normalized.chosenTask }, taskLines);
-  }
+        parsed = JSON.parse(repair.choices[0].message.content ?? "") as FrogChoice;
+        generationRepaired = true;
+        generationModel = repair.model;
+        generationSystemFingerprint = repair.system_fingerprint ?? null;
+        generationResponseId = repair.id;
+        normalized = normalizeChoice({ ...parsed, chosen_task: normalized.chosenTask }, taskLines);
+      }
 
-  chosenTask = normalized.chosenTask;
-  firstStep = normalized.validStep ? normalized.firstStep : `open the ${normalized.chosenTask} task where you will do it`;
-}
+      chosenTask = normalized.chosenTask;
+      firstStep = normalized.validStep ? normalized.firstStep : `open the ${normalized.chosenTask} task where you will do it`;
+    } catch (error) {
+      console.error("frog generation fell back", error);
+      const fallback = deterministicFrogChoice(taskLines);
+      chosenTask = fallback.chosenTask;
+      firstStep = fallback.firstStep;
+      generationSource = "deterministic";
+      generationPromptVersion = "deterministic-openai-fallback-v1";
+    }
+  }
 
   // Guests can try the frog picker without exposing the OpenAI key or
   // creating orphaned database rows. Signing in adds durable memory.
