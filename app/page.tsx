@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useAuth, useClerk } from '@clerk/nextjs'
-import Link from 'next/link'
 import { parseTasks } from '@/lib/tasks'
 import { getLocalContext } from '@/lib/local-context'
 
 const MAX_DUMP_LENGTH = 2_000
 const MAX_TASKS = 25
-const RELIEF_DURATION_MS = 1_700
+const RELIEF_DURATION_MS = 2_600
 const RAW_DUMP_PLACEHOLDER = 'tapheretostartdumpingyourtasks,findmyredsocksandgetdressed,replymydadsmessages,ironmywrinkledtrousers,bringoutthechickentodefrost,putthegroceriesback...'
 const LOCAL_FROG_MEMORY_KEY = 'localFrogMemory'
 const LOCAL_CURRENT_FROG_KEY = 'localCurrentFrog'
@@ -443,7 +442,7 @@ export default function Home() {
         <span>{taskCount}/{MAX_TASKS} tadpoles</span>
       </div>
 
-      <section className={`dump-stage ${frog ? 'dump-stage-hidden' : ''} ${dumpClearing ? 'dump-stage-clearing' : ''}`} aria-label="Task dump">
+      <section className={`dump-stage ${taskBoxActive ? 'dump-stage-active' : ''} ${frog ? 'dump-stage-hidden' : ''} ${dumpClearing ? 'dump-stage-clearing' : ''}`} aria-label="Task dump">
         <div className="dump-field">
           {showClearingDump ? (
             <div className="dump-clearing-text" aria-hidden="true">

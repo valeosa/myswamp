@@ -28,12 +28,12 @@ export function AccountMenu() {
           },
           elements: {
             avatarBox: {
-              background: 'rgba(200, 216, 184, 0.76)',
+              background: '#182015',
               color: 'transparent',
             },
-            userButtonAvatarBox: { width: '2.5rem', height: '2.5rem' },
+            userButtonAvatarBox: { width: '2.28rem', height: '2.28rem' },
             userPreviewAvatarBox: {
-              background: 'rgba(200, 216, 184, 0.78)',
+              background: '#182015',
               color: 'transparent',
               borderRadius: '0',
               boxShadow: 'none',

@@ -28,7 +28,7 @@ type Tadpole = {
 
 const LOCAL_CURRENT_FROG_KEY = 'localCurrentFrog'
 const LOCAL_FROG_MEMORY_KEY = 'localFrogMemory'
-const RELIEF_DURATION_MS = 1_000
+const RELIEF_DURATION_MS = 2_200
 
 function localCurrentFrog() {
   try {
