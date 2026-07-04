@@ -98,6 +98,8 @@ export default function RootLayout({
                 border: '0',
                 background: 'transparent',
                 boxShadow: 'none',
+                
+                 
               },
               formButtonPrimary: {
                 backgroundColor: 'transparent',

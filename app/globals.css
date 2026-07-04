@@ -306,7 +306,7 @@ a[data-analytics]:hover {
 }
 
 .home-swamp {
-  --dump-size: clamp(4.25rem, calc((100dvh - 8rem) / 6.12), 7.45rem);
+  --dump-size: clamp(3.2rem, min(7.2vw, calc((100dvh - 8rem) / 6.12)), 7.45rem);
   --dump-line: 0.78;
   --dump-x-scale: 1;
   --dump-color: rgba(242, 225, 196, 0.48);
@@ -522,7 +522,7 @@ a[data-analytics]:hover {
   box-sizing: border-box;
   height: 100dvh;
   min-height: 0;
-  overflow: hidden;
+
   padding: clamp(4.9rem, 9.6dvh, 7.4rem) 3.65rem 3.95rem;
   transition: opacity 820ms ease, transform 980ms ease, filter 980ms ease;
 }
@@ -667,7 +667,7 @@ a[data-analytics]:hover {
 .home-swamp .dump-placeholder,
 .home-swamp .dump-textarea,
 .home-swamp .dump-clearing-text {
-  height: min(calc(100dvh - 8.15rem), calc(var(--dump-size) * var(--dump-line) * 6.96 + 1.5rem));
+  height: min(calc(100dvh - 11rem), calc(var(--dump-size) * var(--dump-line) * 6.96 + 1.5rem));
 }
 
 .home-count {
@@ -1740,37 +1740,39 @@ a[data-analytics]:hover {
 
 @media (max-width: 760px) {
   .home-swamp {
-    --dump-size: clamp(4.75rem, calc((100dvh - 8.4rem) / 6.32), 6.35rem);
+   --dump-size: clamp(4rem, min(16vw, calc((100dvh - 8.4rem) / 6.32)), 6.35rem);
     --dump-line: 0.78;
     --dump-x-scale: 1;
   }
 
-  .dump-stage {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    gap: 0.35rem;
-    padding: 4.42rem 1rem 0.7rem;
-  }
+ .dump-stage {
+  display: block;
+  height: 100svh;
+  overflow: hidden;
+  padding: 4.42rem 1rem 4.2rem;
+}
 
-  .dump-field {
-    align-self: stretch;
-    box-sizing: border-box;
-    width: min(82vw, 24.5rem);
-    max-width: calc(100vw - 3.15rem);
-    min-height: 0;
-    margin-inline: auto;
-    padding: 0.85rem 0.35rem 0.65rem;
-    border-inline: 1px solid rgba(242, 225, 196, 0.16);
-    border-radius: 999px / 2.25rem;
-    transform: none;
-  }
-
+ .dump-field {
+  box-sizing: border-box;
+  width: min(82vw, 24.5rem);
+  max-width: calc(100vw - 3.15rem);
+  height: calc(100svh - 9rem);
+  margin-inline: auto;
+  padding: 0.85rem 0.35rem 0.65rem;
+  
+  transform: none;
+}
+  
   .home-swamp .dump-placeholder,
-  .home-swamp .dump-textarea,
-  .home-swamp .dump-clearing-text {
-    height: min(calc(100dvh - 8.55rem), calc(var(--dump-size) * var(--dump-line) * 7));
-    max-height: 100%;
-  }
+.home-swamp .dump-textarea,
+.home-swamp .dump-clearing-text {
+  height: 100%;
+  max-height: 100%;
+}
+
+.dump-placeholder-raw {
+  text-decoration: none;
+}
 
   .home-alert,
   .home-error {
@@ -1902,3 +1904,4 @@ a[data-analytics]:hover {
     animation: none;
   }
 }
+

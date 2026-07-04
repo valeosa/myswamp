@@ -84,9 +84,9 @@ function localGuestFrog(tasks: string) {
     'write the first visible word for this task',
     'open the place where this starts',
     'touch the nearest object for this task',
-    'make the smallest visible mark',
+    'open a note taking app and tap the new note button',
   ]
-
+  
   if (/\b(email|mail|inbox)\b/.test(lower)) firstSteps = ['open the email thread', 'reply with one rough sentence']
   else if (/\bschool|class|essay|homework|assignment|notes?\b/.test(lower)) firstSteps = ['open the school document', 'write one ugly first line']
   else if (/\bpackage|return|amazon|parcel\b/.test(lower)) firstSteps = ['open the return page', 'find the label first']
