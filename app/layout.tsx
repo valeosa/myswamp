@@ -90,7 +90,7 @@ export default function RootLayout({
             },
             elements: {
               avatarBox: {
-                background: 'rgba(242, 225, 196, 0.76)',
+                background: 'rgba(200, 216, 184, 0.76)',
                 color: 'transparent',
               },
               cardBox: { boxShadow: 'none', background: 'transparent' },

@@ -305,7 +305,7 @@ a[data-analytics]:hover {
 }
 
 .home-swamp {
-  --dump-size: clamp(4.35rem, calc((100dvh - 8.45rem) / 6.05), 8rem);
+  --dump-size: clamp(4.35rem, calc((100dvh - 8.05rem) / 6.05), 8rem);
   --dump-line: 0.78;
   --dump-x-scale: 1;
   --dump-color: rgba(242, 225, 196, 0.48);
@@ -585,7 +585,7 @@ a[data-analytics]:hover {
   z-index: 1;
   display: block;
   width: calc(100% / var(--dump-x-scale));
-  height: min(calc(100dvh - 8.35rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
+  height: min(calc(100dvh - 7.95rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
   max-width: 100%;
   overflow: hidden;
   color: rgba(242, 225, 196, 0.135);
@@ -623,7 +623,7 @@ a[data-analytics]:hover {
   z-index: 2;
   display: block;
   width: calc(100% / var(--dump-x-scale));
-  height: min(calc(100dvh - 8.35rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
+  height: min(calc(100dvh - 7.95rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
   resize: none;
   overflow-y: auto;
   border: 0;
@@ -666,7 +666,7 @@ a[data-analytics]:hover {
 .home-swamp .dump-placeholder,
 .home-swamp .dump-textarea,
 .home-swamp .dump-clearing-text {
-  height: min(calc(100dvh - 8.35rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
+  height: min(calc(100dvh - 7.95rem), calc(var(--dump-size) * var(--dump-line) * 6.88 + 1.5rem));
 }
 
 .home-count {
@@ -817,6 +817,7 @@ a[data-analytics]:hover {
   color: rgba(242, 225, 196, 0.62);
   line-height: 1;
   cursor: pointer;
+  transform: translateY(-0.05rem);
 }
 
 .music-toggle-icon {
@@ -882,9 +883,20 @@ a[data-analytics]:hover {
   clip-path: polygon(0 0, calc(100% - 1.05rem) 0, calc(100% - 1.05rem) 0.52rem, 100% 0.52rem, 100% 100%, 0 100%);
 }
 
-.drawn-frog-card::before,
-.drawn-frog-card::after {
+.drawn-frog-card::before {
   content: none;
+}
+
+.drawn-frog-card::after {
+  content: "";
+  position: absolute;
+  top: 0.09rem;
+  right: 0.09rem;
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 50%;
+  background: rgba(242, 225, 196, 0.58);
+  pointer-events: none;
 }
 
 .frog-card-label {
@@ -960,7 +972,6 @@ a[data-analytics]:hover {
   font-size: 1.14rem;
   font-weight: 400;
   opacity: 0.92;
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, calc(100% - 0.65rem) 0.34rem, 100% 0.34rem, 100% 100%, 0 100%);
 }
 
 .frog-actions .swamp-button-quiet {
@@ -1036,8 +1047,9 @@ a[data-analytics]:hover {
   display: flex;
   align-items: center;
   gap: 2.25rem;
-  color: rgba(242, 225, 196, 0.7);
+  color: rgba(242, 225, 196, 0.86);
   font-size: 1.1rem;
+  font-weight: 600;
   letter-spacing: 0.095em;
 }
 
@@ -1070,8 +1082,9 @@ a[data-analytics]:hover {
 
 .secondary-subtitle,
 .secondary-muted {
-  color: rgba(242, 225, 196, 0.54);
+  color: rgba(242, 225, 196, 0.66);
   font-size: 1.12rem;
+  font-weight: 500;
   line-height: 1.35;
 }
 
@@ -1099,7 +1112,6 @@ a[data-analytics]:hover {
   background: rgba(6, 13, 8, 0.18) !important;
   color: rgba(242, 225, 196, 0.72);
   box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 1.05rem) 0, calc(100% - 1.05rem) 0.52rem, 100% 0.52rem, 100% 100%, 0 100%);
 }
 
 .secondary-empty-card,
@@ -1145,7 +1157,6 @@ a[data-analytics]:hover {
   padding: 0.55rem 1rem;
   letter-spacing: 0.035em;
   text-decoration: none;
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, calc(100% - 0.65rem) 0.34rem, 100% 0.34rem, 100% 100%, 0 100%);
 }
 
 .secondary-box-link:hover {
@@ -1167,7 +1178,6 @@ a[data-analytics]:hover {
   color: rgba(242, 225, 196, 0.72);
   font-size: 1.08rem;
   letter-spacing: 0.055em;
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, calc(100% - 0.65rem) 0.34rem, 100% 0.34rem, 100% 100%, 0 100%);
 }
 
 .mark-water-open-button:hover {
@@ -1186,7 +1196,6 @@ a[data-analytics]:hover {
   background: rgba(6, 13, 8, 0.12);
   color: rgba(242, 225, 196, 0.76);
   box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 1.2rem) 0, calc(100% - 1.2rem) 0.58rem, 100% 0.58rem, 100% 100%, 0 100%);
 }
 
 .mark-water-input {
@@ -1346,14 +1355,15 @@ a[data-analytics]:hover {
 
 @keyframes lighter-swamp {
   0% { opacity: 0; }
-  18% { opacity: 1; }
-  50% { opacity: 1; }
+  15% { opacity: 1; }
+  68% { opacity: 1; }
   100% { opacity: 0; }
 }
 
 @keyframes completion-glitter {
   0% { opacity: 0; transform: translateY(0) scale(0.58); }
-  32% { opacity: 0.95; transform: translateY(-0.25rem) scale(1); }
+  22% { opacity: 0.95; transform: translateY(-0.25rem) scale(1); }
+  62% { opacity: 0.95; transform: translateY(-0.32rem) scale(1); }
   100% { opacity: 0; transform: translateY(-0.55rem) scale(0.72); }
 }
 
@@ -1361,7 +1371,7 @@ a[data-analytics]:hover {
   background:
     linear-gradient(180deg, rgba(246, 246, 216, 0.12), rgba(199, 240, 173, 0.2)),
     url("/swamp-light.jpeg") center / cover no-repeat;
-  animation: lighter-swamp 920ms ease-in-out both;
+  animation: lighter-swamp 1500ms ease-in-out both;
   overflow: hidden;
   pointer-events: none;
 }
@@ -1387,7 +1397,7 @@ a[data-analytics]:hover {
     91vw 93vh 0 rgba(255, 242, 196, 0.66);
   content: "";
   filter: drop-shadow(0 0 0.42rem rgba(255, 242, 196, 0.72));
-  animation: completion-glitter 560ms ease-out both;
+  animation: completion-glitter 950ms ease-out both;
 }
 
 .lighter-veil::before {
@@ -1424,9 +1434,10 @@ a[data-analytics]:hover {
 .auth-current-link {
   border: 0 !important;
   background: transparent !important;
-  color: rgba(242, 225, 196, 0.74);
+  color: rgba(242, 225, 196, 0.86);
   min-height: 2.15rem;
   font-size: 1.08rem;
+  font-weight: 600;
   line-height: 1;
   letter-spacing: 0.11em;
   text-decoration: none;
@@ -1459,7 +1470,6 @@ a[data-analytics]:hover {
   border: 1px solid rgba(242, 225, 196, 0.46) !important;
   border-radius: 0;
   color: rgba(242, 225, 196, 0.82);
-  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, calc(100% - 0.55rem) 0.32rem, 100% 0.32rem, 100% 100%, 0 100%);
 }
 
 .auth-link-primary:hover {
@@ -1470,12 +1480,13 @@ a[data-analytics]:hover {
   inset: 0;
   z-index: 90;
   border-radius: 999px;
-  background: rgba(242, 225, 196, 0.78);
+  background: rgba(200, 216, 184, 0.78);
 }
 
 .account-menu-avatar {
   position: relative;
   isolation: isolate;
+  transform: translateY(-0.05rem);
 }
 
 .account-menu-avatar::after {
@@ -1483,7 +1494,7 @@ a[data-analytics]:hover {
   inset: 0;
   z-index: 9999;
   border-radius: 999px;
-  background: rgba(242, 225, 196, 0.82);
+  background: rgba(200, 216, 184, 0.82);
   content: "";
   pointer-events: none;
 }
@@ -1491,7 +1502,7 @@ a[data-analytics]:hover {
 .account-menu-avatar-blank-state .cl-userButtonAvatarBox {
   position: relative !important;
   overflow: hidden !important;
-  background: rgba(242, 225, 196, 0.78) !important;
+  background: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
 }
 
@@ -1499,7 +1510,7 @@ a[data-analytics]:hover {
 .account-menu-avatar-blank-state .cl-avatarBox,
 .account-menu-avatar-blank-state .cl-avatarFallback,
 .auth-shell .cl-userButtonAvatarBox {
-  background-color: rgba(242, 225, 196, 0.78) !important;
+  background-color: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
 }
 
@@ -1513,7 +1524,7 @@ a[data-analytics]:hover {
 .account-menu-avatar-blank-state .cl-userButtonAvatarBox::after {
   position: absolute;
   inset: 0;
-  background: rgba(242, 225, 196, 0.78);
+  background: rgba(200, 216, 184, 0.78);
   content: "";
 }
 
@@ -1528,13 +1539,21 @@ a[data-analytics]:hover {
   box-shadow: none !important;
 }
 
+.auth-shell .cl-userButtonTrigger {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .auth-shell .cl-avatarBox,
 .auth-shell .cl-avatar,
 .auth-shell .cl-userButtonAvatarImage,
 .auth-shell .cl-userButtonPopoverCard .cl-avatarBox {
   position: relative !important;
   overflow: hidden !important;
-  background: rgba(242, 225, 196, 0.78) !important;
+  background: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
   box-shadow: none !important;
 }
@@ -1542,7 +1561,7 @@ a[data-analytics]:hover {
 .auth-shell .cl-userButtonAvatarBox {
   position: relative !important;
   overflow: hidden !important;
-  background: rgba(242, 225, 196, 0.78) !important;
+  background: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
 }
 
@@ -1565,7 +1584,7 @@ a[data-analytics]:hover {
   position: absolute;
   inset: 0;
   z-index: 9999;
-  background: rgba(242, 225, 196, 0.82);
+  background: rgba(200, 216, 184, 0.82);
   content: "";
   pointer-events: none;
 }
@@ -1579,7 +1598,7 @@ a[data-analytics]:hover {
 .cl-userButtonPopoverCard .cl-avatarBox {
   position: relative !important;
   border-radius: 0 !important;
-  background: rgba(242, 225, 196, 0.78) !important;
+  background: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
   box-shadow: none !important;
   overflow: hidden !important;
@@ -1595,7 +1614,7 @@ a[data-analytics]:hover {
 
 .cl-avatarFallback {
   border-radius: 0 !important;
-  background: rgba(242, 225, 196, 0.78) !important;
+  background: rgba(200, 216, 184, 0.78) !important;
   color: transparent !important;
   font-size: 0 !important;
 }
@@ -1631,7 +1650,6 @@ a[data-analytics]:hover {
   overflow-y: auto !important;
   border: 1px solid rgba(242, 225, 196, 0.44) !important;
   background: rgba(6, 13, 8, 0.22) !important;
-  clip-path: polygon(0 0, calc(100% - 2.25rem) 0, calc(100% - 2.25rem) 0.82rem, 100% 0.82rem, 100% 100%, 0 100%);
 }
 
 .cl-cardBox,
@@ -1765,7 +1783,6 @@ a[data-analytics]:hover {
 .cl-modalCloseButton {
   border: 1px solid rgba(242, 225, 196, 0.28) !important;
   color: rgba(242, 225, 196, 0.8) !important;
-  clip-path: polygon(0 0, calc(100% - 0.7rem) 0, calc(100% - 0.7rem) 0.35rem, 100% 0.35rem, 100% 100%, 0 100%);
 }
 
 .cl-formFieldInput {
@@ -1791,7 +1808,6 @@ a[data-analytics]:hover {
   border: 1px solid rgba(242, 225, 196, 0.44) !important;
   color: rgba(242, 225, 196, 0.82) !important;
   letter-spacing: 0.045em !important;
-  clip-path: polygon(0 0, calc(100% - 0.7rem) 0, calc(100% - 0.7rem) 0.36rem, 100% 0.36rem, 100% 100%, 0 100%);
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease !important;
 }
 
