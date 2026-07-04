@@ -1771,10 +1771,9 @@ a[data-analytics]:hover {
   max-height: 100%;
 }
 
-.dump-cursor {
-  height: 0.58em;
-  transform: translateY(0);
-  margin-left: 0.08em;
+
+.dump-placeholder-raw {
+  text-decoration: none;
 }
 
 }
